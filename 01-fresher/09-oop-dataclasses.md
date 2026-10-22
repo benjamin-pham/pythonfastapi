@@ -18,6 +18,7 @@ Sau khi hoàn thành bài học này, bạn sẽ:
 - Phân biệt chính xác mục đích sử dụng giữa **`@classmethod`** (nhận `cls`, thường dùng cho Factory methods) và **`@staticmethod`** (hàm tiện ích độc lập).
 - Nắm vững các quy ước truy cập: `_single_underscore` (quy ước protected nội bộ) và `__double_underscore` (Name Mangling chống ghi đè thuộc tính khi kế thừa).
 - Làm chủ các Dunder Methods (Special/Magic Methods) phổ biến: **`__repr__`**, **`__str__`**, **`__eq__`**, **`__len__`**, **`__hash__`**.
+- Áp dụng kế thừa đơn (`class Child(Parent):`) và hàm **`super()`** để tái sử dụng và mở rộng logic từ lớp cha (tương đương từ khóa `base` trong C#).
 - Xây dựng trừu tượng hóa (Abstraction) chuẩn mực bằng **`abc.ABC`** và **`@abstractmethod`** tương đương interface / abstract class trong C#.
 - Sử dụng **`enum.StrEnum`** (Python 3.11+) cho các tập giá trị hằng số thân thiện với JSON serialization.
 - Làm chủ **`@dataclass(slots=True, frozen=True)`** tương đương với `record` trong C# hiện đại: Tự động sinh boilerplate code, tối ưu hóa bộ nhớ và thiết lập tính bất biến (immutability).
@@ -39,6 +40,7 @@ Lập trình viên C# đã thấm nhuần tư tưởng OOP chặt chẽ với c�
 | **Lớp trừu tượng (Abstract Class)** | `public abstract class RepositoryBase` | `class BaseRepository(abc.ABC):` |
 | **Phương thức trừu tượng** | `public abstract Task<T> GetByIdAsync(int id);` | `@abc.abstractmethod def get_by_id(self, id: int):` |
 | **Ép kiểu chuỗi hiển thị** | `ToString()` | `__str__()` (cho người dùng) & `__repr__()` (cho lập trình viên debug) |
+| **Kế thừa & gọi lớp cha** | `class Child : Parent` và `base(...)` / `base.Method()` | `class Child(Parent):` và `super().__init__(...)` / `super().method()` |
 | **Kiểm tra bằng nhau theo giá trị** | `Equals()` hoặc tự động trên `record` | `__eq__()` |
 | **Kiểu Record / Value Object** | `public record TaskRecord(int Id, string Title);` | `@dataclass(slots=True, frozen=True)` |
 | **Định nghĩa chuỗi Enum** | `enum TaskStatus { Todo, Done }` (thường phải serialize sang int hoặc chuỗi tùy cấu hình) | `class TaskStatus(StrEnum):` (kế thừa trực tiếp `str`) |
@@ -192,7 +194,52 @@ class Priority:
 
 ---
 
-### 7. Interface trừu tượng với `abc.ABC` & `@abstractmethod`
+### 7. Kế thừa và hàm `super()`
+
+Trong Python, kế thừa đơn được khai báo bằng cách đặt tên lớp cha trong dấu ngoặc đơn ngay sau tên lớp con: `class Child(Parent):`.
+
+Khi ghi đè (override) phương thức khởi tạo `__init__` hoặc bất kỳ phương thức nào của lớp cha, bạn sử dụng hàm **`super()`** để gọi phiên bản của lớp cha (tương đương với từ khóa `base` trong C#):
+
+```python
+class BaseNotification:
+    """Lớp cha định nghĩa thông báo cơ bản."""
+
+    def __init__(self, recipient: str) -> None:
+        self.recipient = recipient
+
+    def send(self, message: str) -> bool:
+        print(f"[BASE] Gửi tin tới {self.recipient}: {message}")
+        return True
+
+
+class EmailNotification(BaseNotification):
+    """Lớp con kế thừa và mở rộng thêm tiêu đề email."""
+
+    def __init__(self, recipient: str, subject: str) -> None:
+        # Gọi hàm khởi tạo của lớp cha (tương đương base(recipient) trong C#)
+        super().__init__(recipient)
+        self.subject = subject
+
+    def send(self, message: str) -> bool:
+        # Mở rộng logic và gọi tiếp phương thức send của lớp cha
+        print(f"[EMAIL] Tiêu đề: {self.subject}")
+        return super().send(message)
+
+
+# Chạy thử
+email_alert = EmailNotification("dev@company.com", "Cảnh báo lỗi 500")
+email_alert.send("Hệ thống database đang mất kết nối!")
+# Output:
+# [EMAIL] Tiêu đề: Cảnh báo lỗi 500
+# [BASE] Gửi tin tới dev@company.com: Hệ thống database đang mất kết nối!
+```
+
+> [!TIP]
+> **Khác biệt quan trọng với C#**: Trong C#, nếu lớp con không gọi `base(...)` tường minh, trình biên dịch vẫn tự động chèn lời gọi đến constructor không tham số `base()`. Trong Python, nếu bạn định nghĩa `__init__` ở lớp con mà quên gọi `super().__init__(...)`, các thuộc tính của lớp cha sẽ **không bao giờ được khởi tạo** và dẫn đến lỗi `AttributeError` khi truy cập!
+
+---
+
+### 8. Interface trừu tượng với `abc.ABC` & `@abstractmethod`
 
 Trong Python, bạn tạo interface hoặc abstract class bằng cách kế thừa từ **`abc.ABC`** (Abstract Base Class) và trang trí các phương thức bắt buộc bằng decorator **`@abstractmethod`**:
 
@@ -218,7 +265,7 @@ Nếu một class kế thừa từ `TaskStorage` mà không hiện thực hóa �
 
 ---
 
-### 8. `enum.StrEnum` (Python 3.11+)
+### 9. `enum.StrEnum` (Python 3.11+)
 
 Trước Python 3.11, việc định nghĩa Enum chuỗi cần kế thừa cả `str` và `Enum`. Python 3.11 cung cấp sẵn class **`enum.StrEnum`**:
 
@@ -242,7 +289,7 @@ print(f"Trạng thái: {status}")  # "Trạng thái: TODO"
 
 ---
 
-### 9. `@dataclass(slots=True, frozen=True)` (C# `record` của Python)
+### 10. `@dataclass(slots=True, frozen=True)` (C# `record` của Python)
 
 Module `dataclasses` (PEP 557) loại bỏ toàn bộ mã boilerplate nhàm chán khi tạo class chỉ dùng để chứa dữ liệu (DTO, Value Object).
 
@@ -536,6 +583,7 @@ Sau khi hoàn thành bài này, bạn cần tự tin trả lời "Có" cho các 
 - [ ] Bạn hiểu sự khác biệt giữa `@classmethod` (nhận `cls`) và `@staticmethod`?
 - [ ] Bạn hiểu ý nghĩa của quy ước `_protected` và cơ chế name mangling của `__mangled`?
 - [ ] Bạn nắm vững các dunder methods cốt lõi (`__str__`, `__repr__`, `__eq__`, `__hash__`)?
+- [ ] Bạn nắm vững cú pháp kế thừa `class Child(Parent):` và biết cách gọi `super().__init__(...)` để khởi tạo lớp cha?
 - [ ] Bạn biết cách tạo abstract class / interface bằng `abc.ABC` và `@abstractmethod`?
 - [ ] Bạn thành thạo việc tạo dữ liệu bất biến, tiết kiệm RAM với `@dataclass(slots=True, frozen=True)`?
 
