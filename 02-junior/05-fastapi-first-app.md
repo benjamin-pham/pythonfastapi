@@ -197,7 +197,7 @@ app = FastAPI()
 )
 def delete_task(task_id: Annotated[int, Path(ge=1)]) -> None:
     # Thực hiện logic xóa...
-    return None
+    return
 ```
 
 - `status_code`: Thiết lập mã HTTP mặc định khi endpoint thực thi thành công (`HTTP_201_CREATED`, `HTTP_204_NO_CONTENT`). Sử dụng `fastapi.status` giúp code dễ đọc và tránh các con số ma thuật (magic numbers).
@@ -213,6 +213,7 @@ Dưới đây là một ứng dụng FastAPI hoàn chỉnh minh họa toàn bộ
 
 ```python
 from typing import Annotated
+
 from fastapi import FastAPI, HTTPException, Path, Query, status
 
 app = FastAPI(
@@ -353,7 +354,7 @@ def delete_task_by_id(
             detail=f"Không tìm thấy task ID = {task_id} để xóa",
         )
     del fake_tasks_db[task_id]
-    return None
+    return
 ```
 
 ---

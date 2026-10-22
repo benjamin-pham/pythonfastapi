@@ -73,7 +73,6 @@ Năm 2023, Pydantic v2 ra đời như một cuộc đại phẫu toàn diện:
 Mọi schema trong Pydantic đều kế thừa từ `BaseModel`. Mỗi trường dữ liệu được khai báo kèm Type Hint rõ ràng và có thể tùy biến chi tiết bằng `Field(...)`:
 
 ```python
-from datetime import datetime
 from pydantic import BaseModel, Field
 
 
@@ -252,7 +251,8 @@ Dưới đây là một bộ Schemas hoàn chỉnh chuẩn DTO Pattern, tích h�
 ```python
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Annotated, Self
+from typing import Annotated
+
 from fastapi import FastAPI, HTTPException, Path, status
 from pydantic import (
     BaseModel,
@@ -260,7 +260,6 @@ from pydantic import (
     Field,
     computed_field,
     field_validator,
-    model_validator,
 )
 
 

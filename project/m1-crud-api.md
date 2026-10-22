@@ -296,7 +296,7 @@ async def validation_error_handler(
         for err in exc.errors()
     ]
     return create_problem_response(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         title="Validation Failed",
         detail="Dữ liệu payload gửi lên không đáp ứng các ràng buộc kiểm tra.",
         instance=request.url.path,
@@ -305,6 +305,9 @@ async def validation_error_handler(
 ```
 
 ### Bước 3: Schemas Pydantic v2 (`app/schemas/`)
+
+> [!NOTE]
+> **Tổ chức file Schemas:** Trong cấu trúc thư mục của dự án, bạn có thể tách nhỏ thành `app/schemas/common.py`, `app/schemas/project.py`, `app/schemas/task.py` hoặc gom chung vào `app/schemas.py`. Dưới đây là định nghĩa đầy đủ của các schemas được sử dụng trong toàn bộ hệ thống.
 
 ```python
 from datetime import UTC, datetime
@@ -543,7 +546,22 @@ def get_task_repository() -> InMemoryTaskRepository:
 
 ```python
 from typing import Annotated
+
 from fastapi import Depends
+
+from app.core.exceptions import (
+    DuplicateProjectNameError,
+    ProjectNotFoundError,
+    TaskNotFoundError,
+)
+from app.repositories.memory import (
+    InMemoryProjectRepository,
+    InMemoryTaskRepository,
+    get_project_repository,
+    get_task_repository,
+)
+from app.schemas.project import ProjectCreate, ProjectRead
+from app.schemas.task import TaskCreate, TaskListResponse, TaskRead, TaskUpdate
 
 
 class ProjectService:
@@ -697,8 +715,20 @@ def get_task_service(
 
 ```python
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, FastAPI, Path, Query, status
 from fastapi.exceptions import RequestValidationError
+
+from app.core.config import get_settings
+from app.core.exceptions import (
+    DomainError,
+    domain_error_handler,
+    validation_error_handler,
+)
+from app.schemas.project import ProjectCreate, ProjectRead
+from app.schemas.task import TaskCreate, TaskListResponse, TaskRead, TaskUpdate
+from app.services.project import ProjectService, get_project_service
+from app.services.task import TaskService, get_task_service
 
 # Khởi tạo Routers
 projects_router = APIRouter(prefix="/projects", tags=["Projects"])
@@ -824,6 +854,9 @@ app.include_router(api_v1_router)
 ```python
 import pytest
 from fastapi.testclient import TestClient
+
+from app.main import app
+from app.repositories.memory import project_repo, task_repo
 
 
 @pytest.fixture(autouse=True)

@@ -273,10 +273,6 @@ class TaskItemRead(TaskItemCreate):
 
 ### File 3: `service.py` (Tầng nghiệp vụ & Repository)
 ```python
-from typing import Annotated
-from fastapi import Depends
-
-
 class TaskRepository:
     def __init__(self) -> None:
         self._store: dict[int, dict[str, object]] = {
@@ -305,7 +301,11 @@ def get_task_repository() -> TaskRepository:
 ### File 4: `router.py` (Tầng định tuyến HTTP)
 ```python
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
+
+from schemas import TaskItemCreate, TaskItemRead
+from service import TaskRepository, get_task_repository
 
 tasks_router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -330,7 +330,11 @@ def create_new_task(
 ### File 5: `main.py` (Điểm khởi tạo ứng dụng)
 ```python
 from typing import Annotated
+
 from fastapi import Depends, FastAPI
+
+from config import AppSettings, get_app_settings
+from router import tasks_router
 
 # Khởi tạo instance ứng dụng
 settings = get_app_settings()

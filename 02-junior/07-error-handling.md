@@ -191,6 +191,7 @@ Dưới đây là một hệ thống hoàn chỉnh kết hợp: Pydantic Schema 
 
 ```python
 from typing import Annotated, Any
+
 from fastapi import FastAPI, Path, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -299,13 +300,13 @@ async def validation_error_handler(
     problem = ProblemDetails(
         type="https://errors.taskflow.dev/validation-error",
         title="Validation Failed",
-        status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail="Dữ liệu gửi lên không vượt qua các quy tắc kiểm tra hợp lệ.",
         instance=request.url.path,
         invalid_params=invalid_params,
     )
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content=problem.model_dump(exclude_none=True),
         media_type="application/problem+json",
     )

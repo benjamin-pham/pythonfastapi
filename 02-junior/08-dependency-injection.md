@@ -280,7 +280,8 @@ Dưới đây là một ví dụ kiến trúc hoàn chỉnh thể hiện trọn 
 
 ```python
 from collections.abc import Generator
-from typing import Annotated, Protocol
+from typing import Annotated
+
 from fastapi import Depends, FastAPI, HTTPException, Header, status
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
