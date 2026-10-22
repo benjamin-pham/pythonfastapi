@@ -14,7 +14,17 @@ from tools.manifest import ALL_PAGES, BY_PATH, Page, required_links
 from tools.nav import STUB_MARKER, bottom_block, top_block
 
 ROOT = Path(__file__).resolve().parent.parent
-EXCLUDED_DIRS = {".git", ".agents", ".venv", ".pytest_cache", "docs", "tools", "tests", "node_modules"}
+EXCLUDED_DIRS = {
+    ".git",
+    ".agents",
+    ".superpowers",
+    ".venv",
+    ".pytest_cache",
+    "docs",
+    "tools",
+    "tests",
+    "node_modules",
+}
 
 FENCE_RE = re.compile(r"^([ \t]*)```.*?^\1```", re.DOTALL | re.MULTILINE)
 INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
