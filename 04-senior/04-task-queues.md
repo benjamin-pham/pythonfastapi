@@ -148,7 +148,7 @@ async def send_invoice(ctx: dict, user_id: int):
 
 ---
 
-## 💻 Ví dụ thực tế
+## 💻 Ví dụ thực hành
 
 ### 1. Xây dựng cụm Worker ARQ hoàn chỉnh
 

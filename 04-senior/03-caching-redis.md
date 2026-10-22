@@ -93,10 +93,16 @@ Là một kiến trúc sư hệ thống, bạn cần lựa chọn chiến lượ
                  ▼
               Query DB ──► Lưu vào Cache (kèm TTL) ──► Trả về
 
-2. WRITE-THROUGH
+2. READ-THROUGH
+   Client ──► Cache Provider ──► Cache Hit? ──Yes──► Trả về dữ liệu
+                                    │ No (Provider tự query DB)
+                                    ▼
+                                 Query DB ──► Tự nạp Cache ──► Trả về
+
+3. WRITE-THROUGH
    Client ──► Ghi đồng thời vào Cache VÀ Database ──► Trả về thành công
 
-3. WRITE-BEHIND (WRITE-BACK)
+4. WRITE-BEHIND (WRITE-BACK)
    Client ──► Ghi vào Cache (Nhanh) ──► Trả về ngay
                  │
                  ▼ (Bất đồng bộ sau đó)
@@ -108,12 +114,17 @@ Là một kiến trúc sư hệ thống, bạn cần lựa chọn chiến lượ
 - **Ưu điểm**: Chỉ những dữ liệu thực sự được đọc mới nằm trong cache (tiết kiệm RAM). Khi node cache bị crash, hệ thống vẫn hoạt động (chỉ tăng tải tạm thời lên DB).
 - **Nhược điểm**: Cache miss phải tốn 3 chặng mạng (Cache Read -> DB Read -> Cache Write). Dữ liệu có thể bị cũ (stale) nếu cập nhật DB mà quên xóa cache.
 
-#### 2.2 Write-Through
+#### 2.2 Read-Through
+- **Cơ chế**: Về bản chất vận hành tương tự Cache-Aside, nhưng trách nhiệm truy vấn DB khi miss được ủy quyền cho **Cache Provider / Thư viện Cache Adapter** thay vì mã ứng dụng phải tự viết các khối `if data is None: query_db()` lặp đi lặp lại. Ứng dụng xem Cache Provider như nguồn dữ liệu duy nhất.
+- **Đối chiếu C# / .NET**: Tương đương với API `GetOrCreateAsync(key, factory)` của `HybridCache` (.NET 9) hoặc `EasyCaching`.
+- **Ưu điểm**: Đóng gói code gọn gàng, tách biệt hoàn toàn tầng Web khỏi chi tiết cài đặt cache và DB.
+
+#### 2.3 Write-Through
 - **Cơ chế**: Khi ứng dụng cập nhật dữ liệu, nó sẽ ghi đồng thời vào cả Cache và Database trước khi trả về phản hồi cho client.
 - **Ưu điểm**: Cache luôn luôn mới nhất (fresh), dữ liệu đọc ra không bao giờ bị trễ.
 - **Nhược điểm**: Độ trễ khi ghi dữ liệu tăng gấp đôi. Nhiều dữ liệu được ghi vào cache nhưng có thể chẳng bao giờ được đọc tới (gây lãng phí tài nguyên bộ nhớ).
 
-#### 2.3 Write-Behind (Write-Back)
+#### 2.4 Write-Behind (Write-Back)
 - **Cơ chế**: Dữ liệu được ghi ngay vào Cache và phản hồi thành công lập tức cho client. Một tiến trình chạy ngầm định kỳ hoặc theo batch sẽ đọc dữ liệu từ cache và ghi xuống Database.
 - **Trường hợp sử dụng**: Các hệ thống ghi cực nhiều và yêu cầu độ trễ dưới 2ms, chấp nhận mất mát nhỏ khi crash (ví dụ: đếm lượt xem bài viết, lượt click quảng cáo, tracking GPS tài xế).
 
@@ -180,7 +191,7 @@ Ta có thể dùng một Redis Set để gom nhóm các key thuộc cùng một 
 
 ---
 
-## 💻 Ví dụ thực tế
+## 💻 Ví dụ thực hành
 
 ### 1. Triển khai Cache-Aside Pattern hoàn chỉnh kèm Null-Cache và TTL Jitter
 

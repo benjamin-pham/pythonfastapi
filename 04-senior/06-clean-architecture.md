@@ -168,7 +168,7 @@ Thì trong Python hiện đại (PEP 544), chúng ta sử dụng **`typing.Proto
 
 ---
 
-## 💻 Ví dụ thực tế
+## 💻 Ví dụ thực hành
 
 Dưới đây là một dự án mẫu hoàn chỉnh thu nhỏ áp dụng Clean Architecture theo chuẩn Python 3.12+:
 

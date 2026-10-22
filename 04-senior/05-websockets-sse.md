@@ -132,7 +132,7 @@ Khi ứng dụng của bạn scale lên từ 2 pods trở lên đằng sau một
 
 ---
 
-## 💻 Ví dụ thực tế
+## 💻 Ví dụ thực hành
 
 ### 1. Triển khai Server-Sent Events (SSE) Stream tiến độ công việc và Stream LLM Token
 

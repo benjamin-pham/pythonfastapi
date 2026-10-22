@@ -191,7 +191,33 @@ Là một Senior Backend Engineer, bạn phải chọn đúng công cụ cho đ�
 
 ---
 
-## 💻 Ví dụ thực tế
+### 5. Đẩy Blocking I/O khỏi Event Loop bằng `asyncio.to_thread()`
+
+Trong khi các tác vụ **CPU-bound** bắt buộc phải chuyển sang `ProcessPoolExecutor` để tránh bị GIL nghẽn trên 1 nhân CPU, thì các tác vụ **Blocking I/O** (đọc file ổ đĩa bằng hàm `open()` chuẩn, gọi SDK bên thứ ba chỉ hỗ trợ đồng bộ như Stripe/AWS boto3 cũ, hoặc các thư viện C đã tự nhả GIL) không cần tốn chi phí đắt đỏ của việc fork process.
+
+Python 3.9+ cung cấp hàm cấp cao **`asyncio.to_thread(func, /, *args, **kwargs)`**:
+- Tự động lấy default `ThreadPoolExecutor` của event loop và thực thi hàm đồng bộ `func` trên một worker thread riêng.
+- Trả về một coroutine có thể `await` trực tiếp trong endpoint `async def` của FastAPI mà **không làm block Event Loop chính**.
+- Tự động sao chép ngữ cảnh `contextvars` (như `request_id`, correlation token) sang thread mới.
+
+```python
+import asyncio
+import time
+
+
+def legacy_sync_export_report(user_id: int) -> str:
+    """Hàm đồng bộ mô phỏng xuất báo cáo: tốn 0.5s disk/network I/O."""
+    time.sleep(0.5)  # Giả lập I/O đồng bộ blocking
+    return f"/reports/user_{user_id}.pdf"
+
+
+# Trong FastAPI async endpoint:
+# file_path = await asyncio.to_thread(legacy_sync_export_report, user_id)
+```
+
+---
+
+## 💻 Ví dụ thực hành
 
 ### 1. Thực nghiệm kiểm chứng: Đo đạc bộ nhớ với `__slots__`
 
@@ -375,6 +401,19 @@ async def good_parallel_endpoint(
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(pool, heavy_cpu_task, 10_000_000)
     return {"status": "success", "result": result}
+
+
+@app.get("/export-report/{user_id}")
+async def export_report_endpoint(user_id: int) -> dict[str, str]:
+    # ✅ CHUẨN SENIOR: Đẩy blocking I/O sang ThreadPool mặc định qua asyncio.to_thread()
+    def legacy_sync_report(uid: int) -> str:
+        import time
+
+        time.sleep(0.1)  # Giả lập blocking I/O
+        return f"/reports/report_user_{uid}.pdf"
+
+    file_path = await asyncio.to_thread(legacy_sync_report, user_id)
+    return {"status": "success", "file": file_path}
 ```
 
 ---

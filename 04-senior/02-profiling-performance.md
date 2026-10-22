@@ -177,7 +177,7 @@ Trong một Web API chịu tải cao, việc chuyển đổi qua lại giữa Py
 
 ---
 
-## 💻 Ví dụ thực tế
+## 💻 Ví dụ thực hành
 
 ### 1. Truy lùng và cô lập rò rỉ bộ nhớ bằng `tracemalloc`
 
