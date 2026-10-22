@@ -914,7 +914,7 @@ git commit -m "docs(fresher): author lessons 07-11 and project milestone M0"
 - Consumes: Kiến thức Level 01 Fresher.
 - Produces: Mục lục Level 02 và 4 bài học Python nâng cao + testing làm nền móng trực tiếp cho FastAPI (vì FastAPI dùng decorator `@app.get`, generator `yield` cho dependency cleanup, type hints/generics cho validation, và `pytest` cho testing).
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 5 file đang là stub**
+- [x] **Step 1: Chạy `--no-stub` xác nhận 5 file đang là stub**
 
 Run:
 ```bash
@@ -922,7 +922,7 @@ python3 -m tools.check_docs --no-stub 02-junior/README.md 02-junior/01-iterators
 ```
 Expected: FAIL với 5 lỗi `still a stub`.
 
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 5 file (xóa `<!-- STUB -->`)**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 5 file (xóa `<!-- STUB -->`)**
 
 Yêu cầu nội dung cụ thể:
 1. `02-junior/README.md`:
@@ -937,7 +937,7 @@ Yêu cầu nội dung cụ thể:
 5. `02-junior/04-pytest-basics.md`:
    - Tại sao `pytest` vượt trội `unittest` (chỉ cần câu lệnh `assert` tự nhiên, không cần `Assert.AreEqual` như NUnit/xUnit); cấu trúc Arrange–Act–Assert; `@pytest.fixture` và fixture scope (`function`, `module`, `session`) cùng `yield` teardown; `@pytest.mark.parametrize` (↔ `[Theory] [InlineData]` trong xUnit); kiểm tra ngoại lệ với `with pytest.raises(...)`; `tmp_path` và `monkeypatch`.
 
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
 
 Run:
 ```bash
@@ -946,7 +946,7 @@ python3 -m tools.check_docs --no-stub 02-junior/README.md 02-junior/01-iterators
 ```
 Expected: `check_docs: 0 error(s) in 61 pages`
 
-- [ ] **Step 4: Commit Task 5**
+- [x] **Step 4: Commit Task 5**
 
 ```bash
 git add 02-junior/
