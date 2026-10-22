@@ -655,24 +655,24 @@ async def get_my_profile(
 
 Milestone M2 được nghiệm thu đạt chuẩn khi dự án vượt qua 100% các tiêu chí sau:
 
-1. **Cơ sở dữ liệu & Migrations**:
-   - PostgreSQL 17 lưu trữ dữ liệu an toàn, các quan hệ `users`, `projects`, `tasks` thiết lập khóa ngoại chuẩn xác.
-   - Lệnh `alembic upgrade head` chạy thành công tạo đầy đủ các bảng và index mà không phát sinh lỗi.
-2. **Xác thực & Bảo mật**:
-   - Mật khẩu lưu trong bảng `users` được băm bằng Argon2, không bao giờ lộ mật khẩu gốc.
-   - Endpoint `/api/v1/auth/login` cấp Access Token hợp lệ; bảo vệ các route riêng tư bằng HTTP 401 khi không gửi token hoặc token sai.
-   - Kiểm tra phân quyền RBAC: User thường không gọi được route Admin (trả về HTTP 403).
-   - Kiểm tra BOLA/IDOR: User A không thể cập nhật hoặc xóa task của User B.
-3. **Phân trang, Lọc & Sắp xếp**:
-   - `GET /api/v1/tasks` trả về đúng cấu trúc `Page[TaskRead]`.
-   - Lọc đa tiêu chí hoạt động trơn tru; sắp xếp cột chống SQL injection tuyệt đối.
-4. **Kiểm thử tự động**:
-   - 100% test cases trong `tests/` vượt qua màu xanh khi chạy `pytest`.
-   - Độ bao phủ mã nguồn (**Coverage**) đạt từ **85% trở lên**.
-   - Toàn bộ integration test chạy độc lập với cơ chế Nested Savepoint Rollback mà không gây ô nhiễm DB.
-5. **Container & CI Pipeline**:
-   - Chạy lệnh `docker compose up -d` khởi động thành công dịch vụ `api` và `postgres`, tự động hoàn thành migration và sẵn sàng phục vụ.
-   - Pipeline GitHub Actions `.github/workflows/ci.yml` kiểm tra thành công cả 4 khâu: `ruff check`, `ruff format --check`, `mypy --strict`, và `pytest`.
+- [ ] **Cơ sở dữ liệu & Migrations**:
+  - PostgreSQL 17 lưu trữ dữ liệu an toàn, các quan hệ `users`, `projects`, `tasks` thiết lập khóa ngoại chuẩn xác.
+  - Lệnh `alembic upgrade head` chạy thành công tạo đầy đủ các bảng và index mà không phát sinh lỗi.
+- [ ] **Xác thực & Bảo mật**:
+  - Mật khẩu lưu trong bảng `users` được băm bằng Argon2, không bao giờ lộ mật khẩu gốc.
+  - Endpoint `/api/v1/auth/login` cấp Access Token hợp lệ; bảo vệ các route riêng tư bằng HTTP 401 khi không gửi token hoặc token sai.
+  - Kiểm tra phân quyền RBAC: User thường không gọi được route Admin (trả về HTTP 403).
+  - Kiểm tra BOLA/IDOR: User A không thể cập nhật hoặc xóa task của User B.
+- [ ] **Phân trang, Lọc & Sắp xếp**:
+  - `GET /api/v1/tasks` trả về đúng cấu trúc `Page[TaskRead]`.
+  - Lọc đa tiêu chí hoạt động trơn tru; sắp xếp cột chống SQL injection tuyệt đối.
+- [ ] **Kiểm thử tự động**:
+  - 100% test cases trong `tests/` vượt qua màu xanh khi chạy `pytest`.
+  - Độ bao phủ mã nguồn (**Coverage**) đạt từ **85% trở lên**.
+  - Toàn bộ integration test chạy độc lập với cơ chế Nested Savepoint Rollback mà không gây ô nhiễm DB.
+- [ ] **Container & CI Pipeline**:
+  - Chạy lệnh `docker compose up -d` khởi động thành công dịch vụ `api` và `postgres`, tự động hoàn thành migration và sẵn sàng phục vụ.
+  - Pipeline GitHub Actions `.github/workflows/ci.yml` kiểm tra thành công cả 4 khâu: `ruff check`, `ruff format --check`, `mypy --strict`, và `pytest`.
 
 ---
 

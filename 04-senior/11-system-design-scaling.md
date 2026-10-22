@@ -136,7 +136,7 @@ async def create_task(task_data):
     await db.save(task)
     
     # 2. Bắn sự kiện sang Kafka / RabbitMQ
-    await kafka_producer.send("task_created", task.dict())
+    await kafka_producer.send("task_created", task.model_dump())
 ```
 
 #### Vì sao cách viết trên là "Bom nổ chậm"?

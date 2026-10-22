@@ -23,14 +23,22 @@ class Page:
 
 def _level(folder: str, name: str, lessons: list[tuple[str, str]]) -> list[Page]:
     index = Page(f"{folder}/README.md", name, "level", name)
-    return [index, *(Page(f"{folder}/{slug}.md", title, "lesson", name) for slug, title in lessons)]
+    return [
+        index,
+        *(
+            Page(f"{folder}/{slug}.md", title, "lesson", name)
+            for slug, title in lessons
+        ),
+    ]
 
 
 HOME = Page("README.md", "Lộ trình Python & FastAPI: Fresher → Senior", "home")
 
 PROJECT = "Dự án TaskFlow"
 PROJECT_INDEX = Page("project/README.md", PROJECT, "reference", PROJECT)
-M0 = Page("project/m0-cli-task-manager.md", "M0 – CLI Task Manager", "milestone", PROJECT)
+M0 = Page(
+    "project/m0-cli-task-manager.md", "M0 – CLI Task Manager", "milestone", PROJECT
+)
 M1 = Page("project/m1-crud-api.md", "M1 – CRUD API", "milestone", PROJECT)
 M2 = Page("project/m2-production-api.md", "M2 – Production API", "milestone", PROJECT)
 M3 = Page("project/m3-scalable-api.md", "M3 – Scalable API", "milestone", PROJECT)
@@ -86,7 +94,10 @@ MIDDLE = _level(
         ("05-authentication-jwt", "Authentication với JWT"),
         ("06-authorization", "Authorization"),
         ("07-testing-fastapi", "Testing FastAPI"),
-        ("08-middleware-lifespan-background", "Middleware, lifespan & background tasks"),
+        (
+            "08-middleware-lifespan-background",
+            "Middleware, lifespan & background tasks",
+        ),
         ("09-pagination-filtering", "Phân trang, lọc & sắp xếp"),
         ("10-logging-error-handling", "Logging & xử lý lỗi toàn cục"),
         ("11-docker-compose", "Docker & docker-compose"),
@@ -121,9 +132,25 @@ APPENDIX = [
 SELF_ASSESSMENT = APPENDIX[3]
 
 LEVELS = [GETTING_STARTED, FRESHER, JUNIOR, MIDDLE, SENIOR]
-MILESTONE_OF_LEVEL = {"01-fresher": M0, "02-junior": M1, "03-middle": M2, "04-senior": M3}
+MILESTONE_OF_LEVEL = {
+    "01-fresher": M0,
+    "02-junior": M1,
+    "03-middle": M2,
+    "04-senior": M3,
+}
 
-READING_ORDER = [HOME, *GETTING_STARTED, *FRESHER, M0, *JUNIOR, M1, *MIDDLE, M2, *SENIOR, M3]
+READING_ORDER = [
+    HOME,
+    *GETTING_STARTED,
+    *FRESHER,
+    M0,
+    *JUNIOR,
+    M1,
+    *MIDDLE,
+    M2,
+    *SENIOR,
+    M3,
+]
 REFERENCE_PAGES = [PROJECT_INDEX, *APPENDIX]
 ALL_PAGES = [*READING_ORDER, *REFERENCE_PAGES]
 BY_PATH = {page.path: page for page in ALL_PAGES}
@@ -139,7 +166,9 @@ def required_links(page: Page) -> list[Page]:
     if page.kind == "home":
         return [level[0] for level in LEVELS] + REFERENCE_PAGES
     if page.kind == "level":
-        lessons = [p for p in ALL_PAGES if p.kind == "lesson" and p.folder == page.folder]
+        lessons = [
+            p for p in ALL_PAGES if p.kind == "lesson" and p.folder == page.folder
+        ]
         milestone = MILESTONE_OF_LEVEL.get(page.folder)
         return [*lessons, *([milestone] if milestone else []), SELF_ASSESSMENT]
     if page == PROJECT_INDEX:

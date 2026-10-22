@@ -15,7 +15,9 @@ def test_manifest_has_61_unique_pages():
 
 def test_lesson_breadcrumb():
     page = BY_PATH["01-fresher/03-collections.md"]
-    assert breadcrumb(page) == "[🏠 Home](../README.md) › [Fresher](./README.md) › Bài 03"
+    assert (
+        breadcrumb(page) == "[🏠 Home](../README.md) › [Fresher](./README.md) › Bài 03"
+    )
 
 
 def test_first_lesson_footer_points_back_to_level_index():
@@ -28,7 +30,9 @@ def test_first_lesson_footer_points_back_to_level_index():
 
 def test_last_lesson_leads_to_milestone_then_next_level():
     last = BY_PATH["01-fresher/11-tooling-ruff-debugging.md"]
-    assert footer(last).endswith("[M0 – CLI Task Manager ➡️](../project/m0-cli-task-manager.md)")
+    assert footer(last).endswith(
+        "[M0 – CLI Task Manager ➡️](../project/m0-cli-task-manager.md)"
+    )
     assert footer(M0).endswith("[Junior ➡️](../02-junior/README.md)")
 
 
@@ -45,7 +49,9 @@ def test_final_milestone_returns_home():
 def test_home_has_no_breadcrumb_and_a_start_link():
     home = READING_ORDER[0]
     assert top_block(home) == ""
-    assert footer(home) == "[Bắt đầu: Getting Started ➡️](./00-getting-started/README.md)"
+    assert (
+        footer(home) == "[Bắt đầu: Getting Started ➡️](./00-getting-started/README.md)"
+    )
 
 
 def test_apply_nav_is_idempotent_and_replaces_stale_blocks():

@@ -12,7 +12,9 @@ BOTTOM_START, BOTTOM_END = "<!-- nav:bottom -->", "<!-- /nav:bottom -->"
 STUB_MARKER = "<!-- STUB -->"
 
 _TOP_RE = re.compile(re.escape(TOP_START) + r".*?" + re.escape(TOP_END), re.DOTALL)
-_BOTTOM_RE = re.compile(re.escape(BOTTOM_START) + r".*?" + re.escape(BOTTOM_END), re.DOTALL)
+_BOTTOM_RE = re.compile(
+    re.escape(BOTTOM_START) + r".*?" + re.escape(BOTTOM_END), re.DOTALL
+)
 
 
 def rel(src: str, dst: str) -> str:

@@ -1,11 +1,18 @@
 from pathlib import Path
 
-from tools.check_docs import check_links, check_python_blocks, check_sections, run_checks
+from tools.check_docs import (
+    check_links,
+    check_python_blocks,
+    check_sections,
+    run_checks,
+)
 from tools.manifest import BY_PATH
 from tools.scaffold import scaffold
 
 
-def test_check_links_reports_broken_and_absolute_ignores_external_and_code(tmp_path: Path):
+def test_check_links_reports_broken_and_absolute_ignores_external_and_code(
+    tmp_path: Path,
+):
     (tmp_path / "a.md").write_text("x", encoding="utf-8")
     text = (
         "[ok](./a.md#part) [web](https://fastapi.tiangolo.com) [anchor](#top)\n"
@@ -51,7 +58,10 @@ def test_orphans_and_missing_toc_links_are_reported(tmp_path: Path):
     scaffold(tmp_path)
     (tmp_path / "extra.md").write_text("# Extra\n", encoding="utf-8")
     home = tmp_path / "README.md"
-    home.write_text(home.read_text(encoding="utf-8").replace("<!-- STUB -->", "Nội dung"), encoding="utf-8")
+    home.write_text(
+        home.read_text(encoding="utf-8").replace("<!-- STUB -->", "Nội dung"),
+        encoding="utf-8",
+    )
     errors = run_checks(tmp_path)
     assert "extra.md: not listed in tools/manifest.py" in errors
     assert "README.md: missing link to 01-fresher/README.md" in errors

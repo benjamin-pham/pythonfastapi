@@ -30,7 +30,8 @@ FENCE_RE = re.compile(r"^([ \t]*)```.*?^\1```", re.DOTALL | re.MULTILINE)
 INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
 LINK_RE = re.compile(r"\]\(([^)\s]+)\)")
 PY_BLOCK_RE = re.compile(
-    r"(<!-- nocheck -->[ \t]*\n)?^([ \t]*)```python[ \t]*\n(.*?)^\2```", re.DOTALL | re.MULTILINE
+    r"(<!-- nocheck -->[ \t]*\n)?^([ \t]*)```python[ \t]*\n(.*?)^\2```",
+    re.DOTALL | re.MULTILINE,
 )
 
 SECTIONS: dict[str, tuple[str, ...]] = {
@@ -62,12 +63,16 @@ def strip_code(text: str) -> str:
 
 def _local_targets(text: str) -> list[str]:
     return [
-        t for t in LINK_RE.findall(strip_code(text)) if not t.startswith(("http://", "https://", "mailto:", "#"))
+        t
+        for t in LINK_RE.findall(strip_code(text))
+        if not t.startswith(("http://", "https://", "mailto:", "#"))
     ]
 
 
 def _resolve(page_path: str, target: str) -> str:
-    return posixpath.normpath(posixpath.join(posixpath.dirname(page_path), target.split("#", 1)[0]))
+    return posixpath.normpath(
+        posixpath.join(posixpath.dirname(page_path), target.split("#", 1)[0])
+    )
 
 
 def check_links(page_path: str, text: str, root: Path) -> list[str]:
@@ -82,7 +87,11 @@ def check_links(page_path: str, text: str, root: Path) -> list[str]:
 
 def check_required_links(page: Page, text: str) -> list[str]:
     have = {_resolve(page.path, t) for t in _local_targets(text)}
-    return [f"{page.path}: missing link to {p.path}" for p in required_links(page) if p.path not in have]
+    return [
+        f"{page.path}: missing link to {p.path}"
+        for p in required_links(page)
+        if p.path not in have
+    ]
 
 
 def check_sections(page: Page, text: str) -> list[str]:
@@ -110,9 +119,13 @@ def check_nav(page: Page, text: str) -> list[str]:
     errors: list[str] = []
     top = top_block(page)
     if top and top not in text:
-        errors.append(f"{page.path}: nav:top missing or outdated (run: python3 -m tools.scaffold)")
+        errors.append(
+            f"{page.path}: nav:top missing or outdated (run: python3 -m tools.scaffold)"
+        )
     if bottom_block(page) not in text:
-        errors.append(f"{page.path}: nav:bottom missing or outdated (run: python3 -m tools.scaffold)")
+        errors.append(
+            f"{page.path}: nav:bottom missing or outdated (run: python3 -m tools.scaffold)"
+        )
     return errors
 
 
@@ -125,7 +138,9 @@ def iter_markdown(root: Path) -> list[str]:
     return sorted(found)
 
 
-def run_checks(root: Path, strict: bool = False, no_stub: set[str] | None = None) -> list[str]:
+def run_checks(
+    root: Path, strict: bool = False, no_stub: set[str] | None = None
+) -> list[str]:
     errors: list[str] = []
     must_be_written = no_stub or set()
     for page in ALL_PAGES:
@@ -156,7 +171,9 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--strict", action="store_true", help="fail if any page is still a stub")
+    parser.add_argument(
+        "--strict", action="store_true", help="fail if any page is still a stub"
+    )
     parser.add_argument(
         "--no-stub",
         nargs="+",
