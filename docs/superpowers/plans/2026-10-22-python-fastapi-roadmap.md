@@ -1145,48 +1145,10 @@ git commit -m "docs(middle): author lessons 07-12 and project milestone M2"
 - Consumes: Kiến thức Level 03 Middle.
 - Produces: Mục lục Level 04 và 6 bài học đầu của Level 04 Senior.
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
-
-Run:
-```bash
-python3 -m tools.check_docs --no-stub 04-senior/README.md 04-senior/01-python-internals-concurrency.md 04-senior/02-profiling-performance.md 04-senior/03-caching-redis.md 04-senior/04-task-queues.md 04-senior/05-websockets-sse.md 04-senior/06-clean-architecture.md
-```
-Expected: FAIL với 7 lỗi `still a stub`.
-
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
-
-Yêu cầu nội dung cụ thể:
-1. `04-senior/README.md`:
-   - `## 🎯 Mục tiêu đầu ra` (thời lượng `2–3 tháng+`): hiểu sâu cơ chế bên trong CPython (GIL, memory, concurrency), tối ưu hiệu năng có số liệu đo đạc, thiết kế hệ thống phân tán với Redis cache, distributed task queue, realtime WebSocket/SSE, Clean/Hexagonal Architecture, bảo mật OWASP, OpenTelemetry observability, triển khai production và kỹ năng dẫn dắt kỹ thuật của Senior.
-   - `## 📚 Mục lục`: bảng liên kết đủ 12 bài học (`./01-python-internals-concurrency.md` đến `./12-senior-soft-skills.md`), link tới [`../project/m3-scalable-api.md`](../project/m3-scalable-api.md) và [`../appendix/self-assessment.md`](../appendix/self-assessment.md).
-2. `04-senior/01-python-internals-concurrency.md`:
-   - Quản lý bộ nhớ CPython (`PyObject`, reference counting + cyclic garbage collector, `__slots__`), bản chất của **GIL (Global Interpreter Lock)** và chế độ **Free-threaded Python (PEP 703 / Python 3.13t+)**, ma trận lựa chọn giữa `asyncio` (I/O-bound nhiều kết nối), `concurrent.futures.ThreadPoolExecutor` (blocking I/O / thư viện C nhả GIL), và `ProcessPoolExecutor` (CPU-bound); cách đẩy việc nặng khỏi event loop FastAPI bằng `asyncio.to_thread()`.
-3. `04-senior/02-profiling-performance.md`:
-   - Quy trình tối ưu dựa trên đo đạc (Measure → Profile → Optimize → Verify): CPU profiling bằng `cProfile` & `py-spy` (sampling profiler dùng được cho cả async/production), memory profiling với `tracemalloc`, load testing bằng `locust`, phát hiện và diệt lỗi **N+1 queries** trong SQLAlchemy, tinh chỉnh connection pool (`pool_size`, `max_overflow`, `pool_pre_ping`), tăng tốc JSON serialization trong FastAPI.
-4. `04-senior/03-caching-redis.md`:
-   - Tích hợp `redis.asyncio` trong lifespan FastAPI; các chiến lược Cache-Aside, Write-Through, Read-Through; bài toán cache invalidation, chống **Cache Stampede (Thundering Herd)** bằng distributed lock hoặc early expiration, chống Cache Penetration; đối chiếu với `IDistributedCache` / `HybridCache` trong .NET.
-5. `04-senior/04-task-queues.md`:
-   - Khi nào `BackgroundTasks` của FastAPI không đủ (mất việc khi pod restart, không retry, làm nghẽn web worker); kiến trúc Distributed Task Queue với **ARQ** (async-native trên Redis) và **Celery** (↔ Hangfire / Quartz.NET / MassTransit); thiết kế worker **idempotent**, exponential backoff retry, Dead-Letter Queue (DLQ), và lập lịch cron job.
-6. `04-senior/05-websockets-sse.md`:
-   - So sánh và chọn giữa **WebSocket** (2 chiều) và **Server-Sent Events – SSE** (`StreamingResponse`, 1 chiều server → client, cực hợp cho thông báo hoặc AI streaming; ↔ SignalR trong ASP.NET Core); xác thực kết nối WebSocket, quản lý `ConnectionManager`, và mở rộng qua nhiều worker/pod bằng **Redis Pub/Sub**.
-7. `04-senior/06-clean-architecture.md`:
-   - Áp dụng Clean / Hexagonal Architecture (Ports & Adapters) và DDD tactical patterns (Entity, Value Object, Aggregate, Domain Event) trong Python mà không rơi vào bẫy "Java/C#-hóa" quá mức: dùng `typing.Protocol` làm Port ở tầng Domain/Application, tách ORM model khỏi Domain entity khi domain phức tạp (và biết khi nào CRUD đơn giản chỉ cần 3 tầng để tuân thủ YAGNI).
-
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
-
-Run:
-```bash
-python3 -m tools.scaffold
-python3 -m tools.check_docs --no-stub 04-senior/README.md 04-senior/01-python-internals-concurrency.md 04-senior/02-profiling-performance.md 04-senior/03-caching-redis.md 04-senior/04-task-queues.md 04-senior/05-websockets-sse.md 04-senior/06-clean-architecture.md
-```
-Expected: `check_docs: 0 error(s) in 61 pages`
-
-- [ ] **Step 4: Commit Task 9**
-
-```bash
-git add 04-senior/
-git commit -m "docs(senior): author level 04 README and lessons 01-06"
-```
+- [x] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
+- [x] **Step 4: Commit Task 9**
 
 ---
 
