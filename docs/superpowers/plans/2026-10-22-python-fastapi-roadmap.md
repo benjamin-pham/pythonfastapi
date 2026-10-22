@@ -1187,43 +1187,7 @@ git commit -m "docs(middle): author lessons 07-12 and project milestone M2"
 - Consumes: Toàn bộ 56 trang đã biên soạn ở Tasks 2–10.
 - Produces: Hoàn tất 100% 61 trang tài liệu; `python3 -m tools.check_docs --strict` đạt 0 lỗi.
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 5 file cuối đang là stub**
-
-Run:
-```bash
-python3 -m tools.check_docs --no-stub project/README.md appendix/csharp-vs-python.md appendix/glossary.md appendix/resources.md appendix/self-assessment.md
-```
-Expected: FAIL với 5 lỗi `still a stub`.
-
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 5 file (xóa `<!-- STUB -->`)**
-
-Yêu cầu nội dung cụ thể:
-1. `project/README.md`:
-   - Tổng quan dự án xuyên suốt **TaskFlow API**: bài toán nghiệp vụ, sơ đồ ER (`erDiagram` trong Mermaid) cho `User`, `Project`, `Task`, `Comment`, sự tiến hóa kiến trúc qua 4 giai đoạn, và bảng điều hướng tới đủ 4 milestone ([`./m0-cli-task-manager.md`](./m0-cli-task-manager.md), [`./m1-crud-api.md`](./m1-crud-api.md), [`./m2-production-api.md`](./m2-production-api.md), [`./m3-scalable-api.md`](./m3-scalable-api.md)).
-2. `appendix/csharp-vs-python.md`:
-   - Sổ tay tra cứu nhanh C# / ASP.NET Core ↔ Python / FastAPI chia theo 6 nhóm: (1) Công cụ & Hệ sinh thái (`dotnet`/`NuGet` ↔ `uv`/`PyPI`), (2) Cú pháp & Kiểu dữ liệu, (3) OOP & Functional (`record` ↔ `@dataclass`, `LINQ` ↔ comprehension), (4) Bất đồng bộ (`Task` ↔ `asyncio`), (5) Web API (ASP.NET Core ↔ FastAPI, `IOptions` ↔ `pydantic-settings`, DI), (6) Database & Testing (EF Core ↔ SQLAlchemy 2.0, xUnit ↔ `pytest`), kèm bảng "Những thói quen C# cần bỏ khi viết Python".
-3. `appendix/glossary.md`:
-   - Từ điển thuật ngữ giải thích ngắn gọn, dễ hiểu kèm liên hệ C# cho hơn 35 thuật ngữ quan trọng trong lộ trình (ASGI, WSGI, CPython, GIL, Free-threaded Python, PEP, Virtual Environment, Type Hint, Duck Typing, Protocol, Comprehension, Generator, Coroutine, Event Loop, Decorator, Context Manager, Dunder Method, Pydantic, BaseModel, Dependency Injection, Unit of Work, Alembic, N+1 Query, Idempotency, Rate Limiting, OpenTelemetry, v.v.).
-4. `appendix/resources.md`:
-   - Danh mục tài liệu chính thức, sách gối đầu giường (*Fluent Python*, *Architecture Patterns with Python / Cosmic Python*, *High Performance Python*), khóa học, blog/kênh kỹ thuật uy tín, và các open-source repo mẫu đáng đọc.
-5. `appendix/self-assessment.md`:
-   - Bộ tiêu chí tự đánh giá năng lực theo từng cấp độ kèm link quay lại mục lục từng level ([`../00-getting-started/README.md`](../00-getting-started/README.md), [`../01-fresher/README.md`](../01-fresher/README.md), [`../02-junior/README.md`](../02-junior/README.md), [`../03-middle/README.md`](../03-middle/README.md), [`../04-senior/README.md`](../04-senior/README.md)), giúp người học tự kiểm tra trước khi chuyển level hoặc chuẩn bị phỏng vấn.
-
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm định toàn cục `--strict` + pytest**
-
-Run:
-```bash
-python3 -m tools.scaffold
-python3 -m tools.check_docs --strict
-uv run --no-project --with pytest pytest -v
-```
-Expected:
-- `check_docs: 0 error(s) in 61 pages`
-- `15 passed`
-
-- [ ] **Step 4: Commit Task 11**
-
-```bash
-git add project/README.md appendix/
-git commit -m "docs(appendix): author project overview and appendix pages; pass strict doc checks"
-```
+- [x] **Step 1: Chạy `--no-stub` xác nhận 5 file cuối đang là stub**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 5 file (xóa `<!-- STUB -->`)**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm định toàn cục `--strict` + pytest**
+- [x] **Step 4: Commit Task 11**
