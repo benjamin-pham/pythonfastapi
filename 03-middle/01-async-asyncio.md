@@ -22,7 +22,7 @@ Sau khi hoàn thành bài học này, bạn sẽ:
 
 ---
 
-## 🔁 So sánh với C# / .NET
+## 🔁 So sánh với C# / ASP.NET
 
 Đối với lập trình viên C#, từ khóa `async` và `await` đã quá quen thuộc từ thời C# 5.0 (.NET Framework 4.5). Tuy nhiên, bên dưới nắp ca-pô, runtime của .NET và runtime của Python (CPython) vận hành cơ chế bất đồng bộ theo hai triết lý hoàn toàn khác biệt:
 

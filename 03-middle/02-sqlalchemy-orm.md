@@ -21,7 +21,7 @@ Sau khi hoàn thành bài học này, bạn sẽ:
 
 ---
 
-## 🔁 So sánh với C# / Entity Framework Core
+## 🔁 So sánh với C# / ASP.NET
 
 Nếu bạn đã từng làm việc với **Entity Framework Core (EF Core)** trong ASP.NET Core, bạn sẽ nhanh chóng nhận ra sự tương đồng đáng kinh ngạc giữa SQLAlchemy 2.0 và EF Core. Cả hai đều đi theo mô hình **Data Mapper Pattern** kết hợp **Unit of Work**:
 

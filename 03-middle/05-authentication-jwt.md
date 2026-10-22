@@ -21,7 +21,7 @@ Sau khi hoàn thành bài học này, bạn sẽ:
 
 ---
 
-## 🔁 So sánh với C# / ASP.NET Core Authentication
+## 🔁 So sánh với C# / ASP.NET
 
 Trong thế giới ASP.NET Core, hệ thống xác thực thường được cấu hình tập trung thông qua Authentication Middleware và các gói thư viện chuẩn của Microsoft:
 

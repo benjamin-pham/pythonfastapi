@@ -21,7 +21,7 @@ Sau khi hoàn thành bài học này, bạn sẽ:
 
 ---
 
-## 🔁 So sánh với C# / Entity Framework Core Migrations
+## 🔁 So sánh với C# / ASP.NET
 
 Đối với các lập trình viên C# đã quen thuộc với bộ công cụ `dotnet ef`, Alembic mang lại trải nghiệm tương đồng gần như hoàn toàn về mặt tư duy và quy trình làm việc:
 

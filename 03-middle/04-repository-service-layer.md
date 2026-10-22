@@ -21,7 +21,7 @@ Sau khi hoàn thành bài học này, bạn sẽ:
 
 ---
 
-## 🔁 So sánh với C# / ASP.NET Architecture
+## 🔁 So sánh với C# / ASP.NET
 
 Trong hệ sinh thái .NET doanh nghiệp, kiến trúc phân tầng (N-Tier Architecture) kết hợp với mẫu thiết kế **Repository & Unit of Work** là một tiêu chuẩn gần như bắt buộc:
 

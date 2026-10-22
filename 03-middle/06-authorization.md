@@ -20,7 +20,7 @@ Sau khi hoàn thành bài học này, bạn sẽ:
 
 ---
 
-## 🔁 So sánh với C# / ASP.NET Core Authorization
+## 🔁 So sánh với C# / ASP.NET
 
 Trong ASP.NET Core, hệ thống phân quyền được xây dựng vô cùng hoàn chỉnh với Role-based, Claim-based và Policy-based Authorization:
 
