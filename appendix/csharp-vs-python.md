@@ -181,15 +181,15 @@ class TaskDto:
 ```python
 # Python 3.12+ (Pydantic v2 - Dành cho API DTO với Data Validation)
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TaskReadSchema(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     id: UUID
     title: str = Field(min_length=3, max_length=120)
     is_completed: bool = False
-
-    model_config = {"frozen": True}
 ```
 
 ### 3.2. Đa hình & Giao diện: Nominal `interface` vs Structural `typing.Protocol`
