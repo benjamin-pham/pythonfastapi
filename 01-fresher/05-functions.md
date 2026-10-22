@@ -103,7 +103,7 @@ Python cho phép người thiết kế API quy định chặt chẽ cách thức
 
 ```python
 def create_user(
-    username: str,           # Có thể truyền theo vị trí hoặc theo tên
+    username: str,           # Bắt buộc theo vị trí (positional-only)
     /,                       # --- Mọi tham số trước đây là POSITIONAL-ONLY ---
     full_name: str,          # Vị trí hoặc tên đều được
     *,                       # --- Mọi tham số sau đây là KEYWORD-ONLY ---
@@ -136,7 +136,10 @@ Khác với C# kiểm soát biến theo cặp ngoặc nhọn `{}` (Block Scope),
 Một hàm bên trong có khả năng ghi nhớ và truy cập các biến trong phạm vi của hàm bên ngoài (Enclosing Scope) ngay cả khi hàm ngoài đã thực thi xong:
 
 ```python
-def make_multiplier(factor: int):
+from collections.abc import Callable
+
+
+def make_multiplier(factor: int) -> Callable[[int], int]:
     # 'factor' nằm ở Enclosing Scope
     def multiply(x: int) -> int:
         return x * factor  # Đóng gói và ghi nhớ 'factor'
@@ -344,7 +347,10 @@ Viết một hàm `create_execution_counter()` sử dụng cơ chế Closure:
 
 - Định nghĩa:
   ```python
-  def create_execution_counter():
+  from collections.abc import Callable
+
+
+  def create_execution_counter() -> Callable[[str], int]:
       count = 0
       def track(action_name: str) -> int:
           nonlocal count

@@ -165,11 +165,13 @@ CPython là ngôn ngữ thông dịch, nó nạp và thực thi các câu lệnh
 2. **Local Import (Lazy Import)**: Chuyển câu lệnh import vào bên trong thân của hàm cần sử dụng thay vì đặt ở đầu file.
 3. **Sử dụng `TYPE_CHECKING` guard**: Nếu sự phụ thuộc vòng tròn chỉ xảy ra do việc khai báo Type Hints, hãy sử dụng `from typing import TYPE_CHECKING`:
    ```python
+   from __future__ import annotations  # Cho phép type hint chuỗi ngầm định lúc runtime
    from typing import TYPE_CHECKING
 
    if TYPE_CHECKING:
        from taskflow.models.user import User  # Chỉ import khi chạy công cụ kiểm tra kiểu tĩnh (mypy/pylance)
    ```
+   *(Lưu ý: Luôn kèm `from __future__ import annotations` hoặc dùng kiểu chuỗi `'User'` để tránh lỗi `NameError` lúc runtime khi module không được import thật sự).*
 
 ---
 
