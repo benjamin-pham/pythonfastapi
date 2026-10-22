@@ -310,6 +310,7 @@ async def register_user(
 import asyncio
 import random
 from typing import Any
+import orjson
 import redis.asyncio as aioredis
 
 
@@ -337,12 +338,12 @@ async def execute_task_with_dlq(
                 # Đưa vào DLQ trong Redis
                 dlq_record = {
                     "task_name": task_name,
-                    "payload": str(task_payload),
+                    "payload": task_payload,
                     "error": str(exc),
                     "attempts": attempt,
                 }
-                # Lưu vào danh sách DLQ để admin xử lý sau
-                await redis_client.rpush("dlq:failed_tasks", str(dlq_record))
+                # Lưu vào danh sách DLQ dưới định dạng JSON chuẩn để admin xử lý/replay sau
+                await redis_client.rpush("system:dlq:jobs", orjson.dumps(dlq_record))
                 return False
 
             # Tính toán Exponential Backoff kèm Jitter ngẫu nhiên

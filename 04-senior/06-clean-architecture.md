@@ -361,6 +361,7 @@ from pydantic import BaseModel
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 # Container lắp ráp Dependency Injection
+in_memory_repo_instance = InMemoryTaskRepository()
 
 
 def get_task_repository() -> TaskRepositoryPort:
@@ -390,9 +391,6 @@ class TaskResponse(BaseModel):
     assignee_id: int | None
     budget_amount: float
     budget_currency: str
-
-
-in_memory_repo_instance = InMemoryTaskRepository()
 
 
 @router.post("/{task_id}/assign", response_model=TaskResponse)

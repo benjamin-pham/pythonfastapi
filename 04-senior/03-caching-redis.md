@@ -346,18 +346,19 @@ async def get_heavy_analytics_report(redis_client: aioredis.Redis, report_id: st
 
             # Tính toán báo cáo nặng tốn nhiều CPU và SQL
             print(f"-> Đang tính toán báo cáo nặng {report_id} từ Database...")
-            await asyncio.sleep(2.0)  # Giả lập query nặng 2 giây
+            await asyncio.sleep(0.3)  # Giả lập query DB tốn 300ms
             computed_data = {"report_id": report_id, "total_revenue": 985000.0, "status": "FINAL"}
 
             # Lưu vào cache kèm TTL
             await redis_client.set(cache_key, orjson.dumps(computed_data), ex=300)
             return computed_data
         else:
-            # Các requests đến sau không giành được lock -> Chờ 1 chút rồi đọc từ cache
-            await asyncio.sleep(0.5)
-            fallback = await redis_client.get(cache_key)
-            if fallback:
-                return orjson.loads(fallback)
+            # Các requests đến sau không giành được lock -> Polling chờ tiến trình nắm lock tính toán xong
+            for _ in range(30):
+                await asyncio.sleep(0.1)
+                fallback = await redis_client.get(cache_key)
+                if fallback:
+                    return orjson.loads(fallback)
             raise RuntimeError("Hệ thống đang quá tải tính toán báo cáo, vui lòng thử lại sau!")
 ```
 
@@ -472,12 +473,12 @@ class ProductCatalogCache:
     async def invalidate_category(self, category_id: int) -> int:
         tag_key = f"tag:category:{category_id}"
 
-        # Đọc tất cả các keys thuộc tag
+        # Đọc tất cả các keys thuộc tag (với set cực lớn >10,000 keys, nên dùng sscan_iter để tránh nghẽn I/O)
         keys_to_delete = await self.redis.smembers(tag_key)
         if not keys_to_delete:
             return 0
 
-        # Unlink toàn bộ keys sản phẩm và chính tag_key
+        # Unlink bất đồng bộ toàn bộ keys sản phẩm và chính tag_key (UNLINK không block event loop Redis)
         deleted_count = await self.redis.unlink(*keys_to_delete, tag_key)
         return deleted_count
 ```

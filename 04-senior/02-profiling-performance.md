@@ -243,7 +243,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI
 from fastapi.responses import ORJSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import ForeignKey, String, select
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -289,20 +289,18 @@ class TaskItem(Base):
 
 
 class TaskItemOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
 
-    class Config:
-        from_attributes = True
-
 
 class ProjectWithTasksOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     tasks: list[TaskItemOut]
-
-    class Config:
-        from_attributes = True
 
 
 # 3. Database Engine & Session setup
@@ -480,8 +478,8 @@ Tạo một cơ chế kiểm tra (Query Counter) trong SQLAlchemy:
 
 ```python
 import asyncio
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 from sqlalchemy import event, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import selectinload

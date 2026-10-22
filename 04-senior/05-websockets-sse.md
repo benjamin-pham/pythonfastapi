@@ -319,6 +319,10 @@ class DistributedPubSubManager:
     async def close(self) -> None:
         if self.listener_task:
             self.listener_task.cancel()
+            try:
+                await self.listener_task
+            except asyncio.CancelledError:
+                pass
         if self.pub_client:
             await self.pub_client.aclose()
         if self.sub_client:
@@ -483,7 +487,8 @@ class HeartbeatConnectionManager:
 
     async def send_heartbeat_pings(self) -> None:
         dead_sockets: set[WebSocket] = set()
-        for ws in self.connections:
+        # Sao chép danh sách để tránh RuntimeError: Set changed size during iteration
+        for ws in list(self.connections):
             try:
                 # Gửi bản tin ping
                 await ws.send_json({"type": "ping"})
