@@ -73,7 +73,7 @@ graph TD
   - `tools.check_docs`: CLI `python3 -m tools.check_docs [--strict] [--no-stub PATH ...]`
   - 61 file `.md` dạng stub có sẵn `<!-- nav:top -->` và `<!-- nav:bottom -->`.
 
-- [ ] **Step 1: Tạo `.gitignore`, `pytest.ini`, `tools/__init__.py` và viết unit tests cho `nav` và `check_docs`**
+- [x] **Step 1: Tạo `.gitignore`, `pytest.ini`, `tools/__init__.py` và viết unit tests cho `nav` và `check_docs`**
 
 Tạo `.gitignore`:
 ```gitignore
@@ -221,12 +221,12 @@ def test_orphans_and_missing_toc_links_are_reported(tmp_path: Path):
     assert "README.md: missing link to 01-fresher/README.md" in errors
 ```
 
-- [ ] **Step 2: Chạy pytest để xác nhận test fail do chưa có implementation**
+- [x] **Step 2: Chạy pytest để xác nhận test fail do chưa có implementation**
 
 Run: `uv run --no-project --with pytest pytest -q`
 Expected: FAIL với `ModuleNotFoundError: No module named 'tools.manifest'`
 
-- [ ] **Step 3: Viết `tools/manifest.py`, `tools/nav.py`, `tools/scaffold.py`, `tools/check_docs.py`**
+- [x] **Step 3: Viết `tools/manifest.py`, `tools/nav.py`, `tools/scaffold.py`, `tools/check_docs.py`**
 
 Tạo `tools/manifest.py`:
 ```python
@@ -687,7 +687,7 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-- [ ] **Step 4: Chạy pytest, chạy `tools.scaffold` tạo 61 trang stub, và kiểm tra bằng `tools.check_docs`**
+- [x] **Step 4: Chạy pytest, chạy `tools.scaffold` tạo 61 trang stub, và kiểm tra bằng `tools.check_docs`**
 
 Run:
 ```bash
@@ -700,7 +700,7 @@ Expected:
 - `scaffold: created=61 updated=0 total=61`
 - `check_docs: 0 error(s) in 61 pages`
 
-- [ ] **Step 5: Commit công cụ QA và 61 trang stub**
+- [x] **Step 5: Commit công cụ QA và 61 trang stub**
 
 ```bash
 git add .gitignore pytest.ini tools tests docs README.md 00-getting-started 01-fresher 02-junior 03-middle 04-senior project appendix
@@ -721,7 +721,7 @@ git commit -m "feat(tools): add roadmap manifest, nav generator, doc checker and
 - Consumes: Khung nav từ `tools.scaffold`, danh sách required links từ `tools.manifest`.
 - Produces: Trang chủ hoàn chỉnh + trọn bộ Level 00 (không còn `<!-- STUB -->`).
 
-- [ ] **Step 1: Xác nhận kiểm tra `--no-stub` báo lỗi cho 4 file mục tiêu**
+- [x] **Step 1: Xác nhận kiểm tra `--no-stub` báo lỗi cho 4 file mục tiêu**
 
 Run:
 ```bash
@@ -729,7 +729,7 @@ python3 -m tools.check_docs --no-stub README.md 00-getting-started/README.md 00-
 ```
 Expected: FAIL với `still a stub` cho cả 4 file.
 
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 4 file (xóa `<!-- STUB -->`)**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 4 file (xóa `<!-- STUB -->`)**
 
 Yêu cầu nội dung cụ thể cho từng file:
 1. `README.md`:
@@ -766,7 +766,7 @@ Yêu cầu nội dung cụ thể cho từng file:
    - `## ⚠️ Lỗi thường gặp`: Dùng `== None` thay vì `is None`; viết `PascalCase` cho tên hàm/biến; lạm dụng getter/setter `get_x()`/`set_x()` thay vì attribute/property; nhầm lẫn truthiness khi check `if count:` với `count = 0`.
    - `## 🏋️ Bài tập` (3 bài viết lại code từ phong cách C# sang Pythonic, có `<details>` gợi ý), `## ✅ Checklist tự đánh giá`, `## 🔗 Đọc thêm` (PEP 8, Python Data Model).
 
-- [ ] **Step 3: Đồng bộ thanh điều hướng và chạy kiểm tra tài liệu**
+- [x] **Step 3: Đồng bộ thanh điều hướng và chạy kiểm tra tài liệu**
 
 Run:
 ```bash
@@ -775,7 +775,7 @@ python3 -m tools.check_docs --no-stub README.md 00-getting-started/README.md 00-
 ```
 Expected: `check_docs: 0 error(s) in 61 pages`
 
-- [ ] **Step 4: Commit Task 2**
+- [x] **Step 4: Commit Task 2**
 
 ```bash
 git add README.md 00-getting-started/
@@ -799,7 +799,7 @@ git commit -m "docs(getting-started): author home README and level 00 getting st
 - Consumes: Khung nav từ `tools.scaffold`.
 - Produces: Mục lục Level 01 và 6 bài học đầu tiên của Level 01 hoàn chỉnh.
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
+- [x] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
 
 Run:
 ```bash
@@ -807,7 +807,7 @@ python3 -m tools.check_docs --no-stub 01-fresher/README.md 01-fresher/01-syntax-
 ```
 Expected: FAIL với 7 lỗi `still a stub`.
 
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
 
 Yêu cầu nội dung cụ thể:
 1. `01-fresher/README.md`:
@@ -826,7 +826,7 @@ Yêu cầu nội dung cụ thể:
 7. `01-fresher/06-modules-packages.md`:
    - Một file `.py` là một module, thư mục là package; vai trò của `__init__.py`; `import x` vs `from x import y`; absolute import vs relative import; biến `__name__ == "__main__"`; cách `sys.path` tìm module; đối chiếu với `namespace` và `using` trong C#; cách tránh lỗi circular import.
 
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
 
 Run:
 ```bash
@@ -835,7 +835,7 @@ python3 -m tools.check_docs --no-stub 01-fresher/README.md 01-fresher/01-syntax-
 ```
 Expected: `check_docs: 0 error(s) in 61 pages`
 
-- [ ] **Step 4: Commit Task 3**
+- [x] **Step 4: Commit Task 3**
 
 ```bash
 git add 01-fresher/
@@ -858,7 +858,7 @@ git commit -m "docs(fresher): author level 01 README and lessons 01-06"
 - Consumes: Các bài học 01–06 của Level 01.
 - Produces: Hoàn tất toàn bộ Level 01 Fresher và Milestone M0 của dự án TaskFlow.
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 6 file đang là stub**
+- [x] **Step 1: Chạy `--no-stub` xác nhận 6 file đang là stub**
 
 Run:
 ```bash
@@ -866,7 +866,7 @@ python3 -m tools.check_docs --no-stub 01-fresher/07-exceptions.md 01-fresher/08-
 ```
 Expected: FAIL với 6 lỗi `still a stub`.
 
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 6 file (xóa `<!-- STUB -->`)**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 6 file (xóa `<!-- STUB -->`)**
 
 Yêu cầu nội dung cụ thể:
 1. `01-fresher/07-exceptions.md`:
@@ -883,7 +883,7 @@ Yêu cầu nội dung cụ thể:
    - Xây dựng ứng dụng CLI **TaskFlow M0** quản lý công việc bằng Python thuần (stdlib `argparse`, `json`, `pathlib`, `dataclasses`, `datetime`, `enum`).
    - Có đủ các mục: `## 📌 Bối cảnh`, `## 🎯 Yêu cầu chức năng` (thêm task, liệt kê có lọc theo `status`/`priority`, cập nhật trạng thái, xóa task, lưu bền vững vào `tasks.json`), `## 🛠️ Yêu cầu kỹ thuật` (type hints 100%, `@dataclass`, custom exception, pass `ruff check` & `ruff format`), `## 📁 Gợi ý cấu trúc thư mục`, `## 💡 Gợi ý triển khai` (đặt trong `<details>`), `## ✅ Definition of Done` (checklist `- [ ]`), `## 🚀 Thử thách thêm` (tìm kiếm theo từ khóa, xuất báo cáo Markdown, cảnh báo task quá hạn).
 
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm tra toàn bộ Level 01 + M0**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm tra toàn bộ Level 01 + M0**
 
 Run:
 ```bash
@@ -892,7 +892,7 @@ python3 -m tools.check_docs --no-stub 01-fresher/07-exceptions.md 01-fresher/08-
 ```
 Expected: `check_docs: 0 error(s) in 61 pages`
 
-- [ ] **Step 4: Commit Task 4**
+- [x] **Step 4: Commit Task 4**
 
 ```bash
 git add 01-fresher/ project/m0-cli-task-manager.md

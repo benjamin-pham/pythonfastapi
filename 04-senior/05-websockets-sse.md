@@ -33,6 +33,9 @@ Trong hệ sinh thái ASP.NET Core, **SignalR** là thư viện thời gian th�
 | **Xác thực kết nối** | SignalR Client tự động truyền JWT qua query `access_token` khi handshake. | Tự thiết kế Dependency trích xuất và xác thực token qua query parameter hoặc ticket. |
 | **Mở rộng nhiều máy chủ (Scale-out)** | **SignalR Redis Backplane** (`AddStackExchangeRedis()`) hoặc Azure SignalR Service. | Tự triển khai **Redis Pub/Sub** lắng nghe kênh và forward tin nhắn xuống các local WebSocket sockets. |
 
+> [!NOTE]
+> Trong ASP.NET Core, khi scale-out nhiều máy chủ, bạn thường dùng gói `Microsoft.AspNetCore.SignalR.StackExchangeRedis` hoặc dịch vụ đám mây Azure SignalR Service để đồng bộ message giữa các instance. Trong hệ sinh thái Python / FastAPI, Redis Pub/Sub đóng vai trò backplane tương đương, giúp phát sóng message đến toàn bộ các worker process / container FastAPI đang kết nối với client.
+
 ---
 
 ## 📖 Lý thuyết

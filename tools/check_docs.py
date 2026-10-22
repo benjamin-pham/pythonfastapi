@@ -149,6 +149,12 @@ def run_checks(root: Path, strict: bool = False, no_stub: set[str] | None = None
 
 
 def main(argv: list[str] | None = None) -> int:
+    if sys.version_info < (3, 12):
+        print(
+            f"Warning: Python {sys.version_info.major}.{sys.version_info.minor} detected. "
+            "Python 3.12+ is recommended to parse modern Python AST snippets.",
+            file=sys.stderr,
+        )
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--strict", action="store_true", help="fail if any page is still a stub")
     parser.add_argument(
