@@ -467,6 +467,7 @@ Viết hàm `parse_task_config(raw_json: str) -> dict[str, str]`:
 <summary>💡 Gợi ý</summary>
 
 ```python
+from typing import Any
 import json
 
 
@@ -474,7 +475,7 @@ class ConfigCorruptedError(Exception):
     """Ngoại lệ khi chuỗi cấu hình bị hỏng."""
 
 
-def parse_task_config(raw_json: str) -> dict[str, str]:
+def parse_task_config(raw_json: str) -> dict[str, Any]:
     try:
         data = json.loads(raw_json)
         if not isinstance(data, dict):

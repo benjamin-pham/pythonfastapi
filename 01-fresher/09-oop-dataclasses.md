@@ -423,7 +423,8 @@ def main() -> None:
     # Cập nhật trạng thái bất biến
     t1_updated = t1.mark_completed()
     repo.add(t1_updated)
-    print(f"\nSau khi hoàn thành: Task 1 Status = {repo.get_by_id(1).status}")  # type: ignore[union-attr]
+    if found_task := repo.get_by_id(1):
+        print(f"\nSau khi hoàn thành: Task 1 Status = {found_task.status}")
 
 
 if __name__ == "__main__":

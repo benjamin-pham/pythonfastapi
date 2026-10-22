@@ -123,7 +123,7 @@ taskflow-m0/
 
 ```python
 from dataclasses import asdict, dataclass, field
-from datetime import date, datetime
+from datetime import datetime
 from enum import StrEnum
 from typing import Any, Self
 
@@ -322,8 +322,8 @@ class TaskService:
 ### Bước 5: Giao diện CLI với `argparse` (`taskflow/cli.py`)
 
 ```python
-from pathlib import Path
 import argparse
+from pathlib import Path
 import sys
 
 from taskflow.exceptions import TaskFlowError
