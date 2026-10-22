@@ -219,6 +219,41 @@ def process_items(items: list[Any]) -> None:
         print(", ".join(items))
 ```
 
+
+#### c. `ParamSpec`: Bảo toàn Type Signature cho Decorator
+
+Trong bài học trước ([02. Decorator & Context Manager](./02-decorators-context-managers.md)), khi tạo decorator bằng `Callable[..., Any]`, bạn sẽ đánh mất gợi ý tham số và kiểu trả về của hàm gốc trong IDE.
+
+Python 3.10+ bổ sung **`ParamSpec`** (PEP 612) để giải quyết triệt để vấn đề này. `ParamSpec` đại diện cho toàn bộ danh sách tham số (args và kwargs) của một callable:
+
+```python
+from collections.abc import Callable
+from typing import Any, ParamSpec, TypeVar
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def log_execution(func: Callable[P, R]) -> Callable[P, R]:
+    """Decorator bảo toàn 100% chữ ký tham số (signature) và kiểu trả về."""
+
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+        print(f"Gọi hàm: {func.__name__}")
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@log_execution
+def calculate_tax(amount: float, rate: float = 0.1) -> float:
+    return amount * rate
+
+
+# mypy và VS Code biết chính xác:
+# calculate_tax(amount: float, rate: float = ...) -> float
+total = calculate_tax(100.0, rate=0.08)  # ✅ Type-safe hoàn hảo!
+```
+
 ### 5. Cấu hình `mypy --strict` trong `pyproject.toml`
 
 Để dự án Python đạt tiêu chuẩn an toàn cấp doanh nghiệp (Enterprise-grade Type Safety), bạn nên cấu hình `mypy` ở chế độ khắt khe nhất (`--strict`).
@@ -441,7 +476,7 @@ class Transformer[InputT, OutputT](Protocol):
 
 ---
 
-### Bài 3: Ràng buộc kiểu dữ liệu số với Type Bounds
+### Bài 3: Ràng buộc kiểu dữ liệu số với Type Constraints (Ràng buộc tập kiểu)
 Viết hàm Generic `calculate_discount[T: (int, float)](price: T, discount_percentage: float) -> float`:
 - Ràng buộc tham số `price` chỉ được phép là `int` hoặc `float`.
 - Nếu truyền vào kiểu dữ liệu khác như `str`, mypy sẽ phát hiện lỗi tĩnh.

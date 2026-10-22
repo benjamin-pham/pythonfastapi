@@ -80,13 +80,14 @@ Mô hình chuẩn của một decorator gồm 2 tầng hàm:
 from collections.abc import Callable
 import functools
 import time
+from typing import Any
 
 
-def timer(func: Callable) -> Callable:
+def timer(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator đo thời gian thực thi của một hàm."""
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         start_time = time.perf_counter()
         # Gọi hàm gốc
         result = func(*args, **kwargs)
@@ -149,14 +150,17 @@ Nếu bạn muốn truyền cấu hình vào decorator, ví dụ `@retry(max_att
 from collections.abc import Callable
 import functools
 import time
+from typing import Any
 
 
-def retry(max_attempts: int = 3, delay_seconds: float = 0.5) -> Callable:
+def retry(
+    max_attempts: int = 3, delay_seconds: float = 0.5
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator tự động thử lại khi hàm ném ngoại lệ."""
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             attempts = 0
             while True:
                 try:

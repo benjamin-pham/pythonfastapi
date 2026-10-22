@@ -495,11 +495,15 @@ Viết hàm generator đệ quy `extract_all_products(category_node: dict) -> Ge
 <details>
 <summary>💡 Gợi ý</summary>
 
-- Đầu tiên, yield toàn bộ sản phẩm của node hiện tại: `yield from category_node.get("products", [])`.
-- Sau đó, lặp qua danh sách `children` và gọi đệ quy với `yield from`:
+- Sử dụng `yield from` để yield toàn bộ sản phẩm của node hiện tại, sau đó duyệt qua `children` và gọi đệ quy:
   ```python
-  for child in category_node.get("children", []):
-      yield from extract_all_products(child)
+  from collections.abc import Iterator
+
+
+  def extract_all_products(category_node: dict) -> Iterator[str]:
+      yield from category_node.get("products", [])
+      for child in category_node.get("children", []):
+          yield from extract_all_products(child)
   ```
 </details>
 
