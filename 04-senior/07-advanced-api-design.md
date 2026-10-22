@@ -179,6 +179,28 @@ LIMIT 20;
 
 ---
 
+### 5. Thiết kế & Bảo mật Webhook với HMAC-SHA256
+
+Webhook là cơ chế thông báo sự kiện bất đồng bộ giữa các máy chủ (Server-to-Server). Khi một sự kiện nghiệp vụ xảy ra (ví dụ: Task hoàn thành, thanh toán thành công qua Stripe/VNPay), hệ thống sẽ gửi một HTTP POST request chứa dữ liệu sự kiện đến URL endpoint do phía đối tác đăng ký.
+
+#### Các rủi ro an ninh trong Webhook:
+1. **Mạo danh (Spoofing)**: Kẻ tấn công gửi HTTP POST giả mạo đến webhook endpoint của người nhận để kích hoạt sai lệch nghiệp vụ.
+2. **Nghe lén & Chèn sửa dữ liệu (Tampering)**: Thay đổi payload trên đường truyền nếu không dùng HTTPS và chữ ký số.
+3. **Tấn công lặp lại (Replay Attacks)**: Kẻ tấn công bắt gói tin hợp lệ và gửi lại nhiều lần để ép hệ thống xử lý lặp.
+4. **Timing Attacks**: Dùng toán tử `==` để so sánh chuỗi chữ ký, giúp kẻ tấn công đo lường thời gian phản hồi (tính bằng micro-giây) để dò tìm từng ký tự của chữ ký bí mật.
+
+#### Tiêu chuẩn bảo mật cấp Senior (Chuẩn hóa theo Stripe / GitHub):
+- **Secret dùng chung (Shared Secret)**: Mỗi bên nhận webhook được cấp một secret key ngẫu nhiên an toàn (`whsec_...`).
+- **Chữ ký số HMAC-SHA256**: Phía gửi tạo chữ ký băm mật mã:
+  $$\text{Signature} = \text{HMAC-SHA256}(\text{key}=\text{secret}, \text{msg}=f"t=\{\text{timestamp}\}.v1=\{\text{payload\_bytes}\}")$$
+- **Tiêu đề đính kèm**:
+  - `X-Webhook-Signature`: Mã hex của chữ ký HMAC-SHA256.
+  - `X-Webhook-Timestamp`: Thời gian Unix Epoch (giây) lúc gửi.
+- **Xác thực Constant-Time**: Bên nhận dùng hàm `hmac.compare_digest()` để so sánh chữ ký nhận được với chữ ký tự tính toán, loại bỏ hoàn toàn lỗ hổng Timing Attack.
+- **Dung sai thời gian (Tolerance Window)**: Bên nhận từ chối bất kỳ webhook nào có $| \text{current\_time} - \text{timestamp} | > 300\text{s}$ (5 phút) để triệt tiêu Replay Attacks.
+
+---
+
 ## 💻 Ví dụ thực hành
 
 ### 1. Triển khai Idempotency Middleware với Redis
@@ -494,6 +516,65 @@ async def fetch_tasks_keyset(
 
 ---
 
+### 4. Triển khai Webhook Receiver với xác thực HMAC-SHA256 & Chống Replay
+
+Dưới đây là một Dependency FastAPI chuẩn công nghiệp để xác thực Webhook:
+
+```python
+import hashlib
+import hmac
+import time
+from typing import Annotated
+
+from fastapi import Depends, Header, HTTPException, Request, status
+from pydantic import BaseModel
+
+WEBHOOK_SECRET = "whsec_live_test_secret_key_antigravity_2026"
+TOLERANCE_SECONDS = 300  # Chặn replay attack vượt quá 5 phút
+
+
+class WebhookPayload(BaseModel):
+    event: str
+    data: dict[str, str | int]
+
+
+async def verify_webhook_signature(
+    request: Request,
+    x_webhook_signature: Annotated[str, Header()],
+    x_webhook_timestamp: Annotated[int, Header()],
+) -> bytes:
+    """Dependency xác thực chữ ký HMAC-SHA256 và chống Replay Attack."""
+    # 1. Kiểm tra timestamp để chống Replay Attack
+    current_time = int(time.time())
+    if abs(current_time - x_webhook_timestamp) > TOLERANCE_SECONDS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Webhook timestamp quá cũ hoặc lệch múi giờ (vượt quá 5 phút).",
+        )
+
+    # 2. Đọc raw body bytes (bắt buộc dùng raw bytes, không dùng parsed JSON)
+    raw_body = await request.body()
+
+    # 3. Tính toán chữ ký HMAC-SHA256 theo format: t={timestamp}.v1={body}
+    signed_payload = f"t={x_webhook_timestamp}.v1=".encode("utf-8") + raw_body
+    expected_signature = hmac.new(
+        WEBHOOK_SECRET.encode("utf-8"),
+        signed_payload,
+        hashlib.sha256,
+    ).hexdigest()
+
+    # 4. So sánh constant-time bằng hmac.compare_digest để chống Timing Attack
+    if not hmac.compare_digest(expected_signature, x_webhook_signature):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Chữ ký Webhook không hợp lệ!",
+        )
+
+    return raw_body
+```
+
+---
+
 ## ⚠️ Lỗi thường gặp
 
 ### 1. Không kiểm tra Request Fingerprint trong Idempotency Key
@@ -511,6 +592,11 @@ Khi có 5 bản ghi được tạo ra trong cùng một microsecond (`created_at
 
 ### 4. Bỏ qua cấu hình `Vary` Header khi dùng Versioning qua Header
 Nếu bạn triển khai API Versioning qua Header (`X-API-Version` hoặc `Accept`) nhưng không bổ sung `Vary: X-API-Version` trong HTTP response, các CDN hoặc Caching Proxy ở tầng trung gian (Cloudflare, Varnish) sẽ cache kết quả của Client gọi v1 và trả nhầm cho Client gọi v2.
+
+### 5. So sánh chữ ký Webhook bằng toán tử `==` và bỏ qua Timestamp
+Sai lầm phổ biến khi tích hợp Webhook là so sánh `if signature == expected:` và không kiểm tra header timestamp.
+- *Hậu quả*: Toán tử `==` trả về `False` ngay khi gặp ký tự sai đầu tiên, khiến thời gian so sánh phụ thuộc vào số ký tự khớp, tạo điều kiện cho hacker thực hiện tấn công **Side-channel Timing Attack**. Đồng thời, kẻ nghe lén có thể bắt gói tin cũ và gửi lại (Replay Attack) vô hạn lần.
+- *Khắc phục*: Luôn dùng **`hmac.compare_digest()`** để so sánh constant-time và giới hạn độ trễ timestamp trong vòng 300 giây.
 
 ---
 

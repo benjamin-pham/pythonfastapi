@@ -171,6 +171,51 @@ Tận dụng tính toàn vẹn **ACID Transaction** của Cơ sở dữ liệu q
 
 ---
 
+### 5. Đánh Index PostgreSQL nâng cao & Giải mã Kế hoạch truy vấn EXPLAIN (ANALYZE, BUFFERS)
+
+Chỉ số (Index) là vũ khí tối thượng của một Senior Backend Engineer khi tối ưu tầng dữ liệu. Đánh index bừa bãi sẽ làm chậm toàn bộ thao tác `INSERT/UPDATE` và lãng phí RAM, trong khi thiếu index sẽ khiến hệ thống bị sập vì Full Table Scan (Sequential Scan).
+
+#### 5.1 Các loại Index trọng tâm trong PostgreSQL:
+1. **B-Tree Composite Index & Leftmost Prefix Rule**:
+   - Khi tạo index trên nhiều cột `CREATE INDEX idx_user_status_date ON tasks (user_id, status, created_at DESC);`, PostgreSQL chỉ có thể tận dụng index nếu câu lệnh `WHERE` lọc từ cột bên trái nhất (`user_id`).
+   - Nếu bạn `SELECT ... WHERE status = 'DONE';`, index trên sẽ **hoàn toàn vô hiệu**!
+2. **Partial Index (Chỉ mục một phần)**:
+   - Thay vì đánh index toàn bộ 50 triệu bản ghi, chỉ đánh index các bản ghi cần truy vấn thường xuyên:
+     ```sql
+     CREATE INDEX idx_active_tasks ON tasks (user_id, created_at DESC)
+     WHERE status = 'IN_PROGRESS';
+     ```
+   - Dung lượng index giảm đến 95%, toàn bộ index nằm trọn vẹn trong RAM (Shared Buffers), tốc độ đọc đạt mức tối đa.
+3. **GIN Index (Generalized Inverted Index)**:
+   - Dùng cho các cột `JSONB` hoặc tìm kiếm toàn văn bản (Full-text Search):
+     ```sql
+     CREATE INDEX idx_tasks_metadata ON tasks USING gin (metadata jsonb_path_ops);
+     ```
+   - Cho phép tìm kiếm thần tốc với toán tử `@>`: `WHERE metadata @> '{"priority": "URGENT"}'`.
+
+#### 5.2 Đọc kế hoạch truy vấn với `EXPLAIN (ANALYZE, BUFFERS)`
+Khi truy vấn chậm, đừng đoán mò. Hãy chạy trực tiếp `EXPLAIN (ANALYZE, BUFFERS)`:
+- `Seq Scan`: Quét toàn bộ bảng $\to$ Cần xem xét thêm index phù hợp.
+- `Index Scan` vs `Bitmap Index Scan`: `Index Scan` đọc trực tiếp từ Index đến Table Page; `Bitmap Index Scan` gom các con trỏ trang thành bitmap trước khi đọc, phù hợp khi số dòng khớp khá lớn.
+- `Buffers: shared hit=421 read=12`: `shared hit` là số block 8KB đọc từ RAM cache; `read` là số block phải đọc từ ổ đĩa SSD. Mục tiêu của việc tối ưu là tăng tỷ lệ `shared hit` lên sát 100%!
+
+---
+
+### 6. Quản trị Connection Pooling quy mô lớn với PgBouncer
+
+Mỗi kết nối vào PostgreSQL tương ứng với một tiến trình OS riêng biệt (`postgres: user db client`), tiêu tốn từ 5MB đến 10MB RAM và gây chi phí chuyển ngữ cảnh (Context Switching) đắt đỏ cho CPU.
+- Một cụm Kubernetes gồm 50 API Pods $\times$ 10 workers = 500 connections $\to$ PostgreSQL bị nghẽn CPU và cạn RAM.
+- **Giải pháp**: Đặt **PgBouncer** làm middleware gom kết nối (Connection Pooler) đứng trước PostgreSQL.
+
+#### So sánh các chế độ Pooling của PgBouncer:
+| Chế độ Pooling | Cơ chế hoạt động | Khuyến nghị sử dụng |
+|---|---|---|
+| **Session Pooling** | Gán chặt 1 PostgreSQL connection cho 1 client connection suốt thời gian client kết nối. | Không giải quyết được bài toán scale nhiều pods. |
+| **Transaction Pooling** | Connection thực tế chỉ được mượn từ pool trong thời gian một Transaction (`BEGIN ... COMMIT`) diễn ra. Khi transaction kết thúc, connection được nhả lại ngay lập tức cho client khác! | **Khuyến nghị chuẩn cho REST API**. 2,000 client connections chỉ cần 50 PostgreSQL connections! |
+| **Statement Pooling** | Mỗi câu lệnh SQL mượn một connection khác nhau. | Cấm dùng (không hỗ trợ multi-statement transaction). |
+
+---
+
 ## 💻 Ví dụ thực hành
 
 ### 1. Phân tách Read/Write Replica Routing trong SQLAlchemy 2.0
@@ -401,6 +446,16 @@ Nhiều kỹ sư vội vã triển khai Sharding khi dữ liệu mới chỉ có
 
 ### 4. Circuit Breaker thiếu trạng thái Half-Open
 Nếu Circuit Breaker chỉ có 2 trạng thái `OPEN` và `CLOSED`, một khi đã mở (OPEN), nó sẽ không bao giờ biết khi nào dịch vụ bên ngoài đã khỏe lại để tự đóng mạch. Bắt buộc phải có trạng thái `HALF_OPEN` để cho phép một vài request thử nghiệm đi qua sau khoảng thời gian `recovery_timeout`.
+
+### 5. Sử dụng Prepared Statements mặc định của asyncpg khi đi qua PgBouncer Transaction Mode
+Driver `asyncpg` mặc định tự động chuẩn bị (prepare) và lưu cache câu lệnh SQL ở cấp kết nối. Khi kết nối qua PgBouncer ở chế độ Transaction Pooling, câu lệnh `PREPARE` ở transaction 1 được thực thi trên backend connection A, nhưng transaction tiếp theo có thể bị gán cho backend connection B (nơi chưa từng chạy prepare câu lệnh đó), gây lỗi nghiêm trọng `InvalidSqlStatementNameError: prepared statement "__asyncpg_stmt_1__" does not exist`.
+- *Khắc phục*: Trong connection string hoặc `connect_args` của SQLAlchemy / asyncpg, bắt buộc phải tắt cache prepared statement:
+  ```python
+  engine = create_async_engine(
+      DATABASE_URL,
+      connect_args={"statement_cache_size": 0, "prepared_statement_cache_size": 0},
+  )
+  ```
 
 ---
 

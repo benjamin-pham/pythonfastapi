@@ -113,6 +113,16 @@ Hệ thống TaskFlow M3 kế thừa toàn bộ các chức năng quản lý Ng�
 
 ---
 
+### 5. Phân hệ Bình luận (Comment) & Thông báo Tương tác
+
+| Method | Endpoint | Quyền hạn | Mô tả |
+|---|---|:---:|---|
+| `POST` | `/api/v1/tasks/{task_id}/comments` | Project Member | Thêm bình luận vào công việc. Lưu `CommentEntity` vào database, đồng thời phát sự kiện `task.comment_created` lên Redis Pub/Sub để các thành viên đang mở board nhận cập nhật ngay lập tức, và enqueue job thông báo email qua ARQ. |
+| `GET` | `/api/v1/tasks/{task_id}/comments` | Project Member | Lấy danh sách bình luận của task theo thứ tự thời gian tăng dần (`created_at ASC`). |
+| `DELETE` | `/api/v1/comments/{comment_id}` | Comment Author / `ADMIN` | Xóa bình luận. |
+
+---
+
 ## ⚙️ Yêu cầu kỹ thuật
 
 Để hoàn thành xuất sắc Milestone M3, dự án bắt buộc phải thỏa mãn các tiêu chuẩn kiến trúc cấp Senior sau:
@@ -120,7 +130,7 @@ Hệ thống TaskFlow M3 kế thừa toàn bộ các chức năng quản lý Ng�
 1. **Kiến trúc Clean / Hexagonal Architecture (Ports & Adapters)**:
    - **Tầng Domain Core**: Tinh khiết 100%, chỉ sử dụng `@dataclass(slots=True)` hoặc Pydantic BaseModel độc lập. Không import bất kỳ thư viện nào từ FastAPI, SQLAlchemy, Redis hay HTTPX.
    - **Tầng Ports**: Định nghĩa giao ước trừu tượng bằng **`typing.Protocol`** (Structural Subtyping):
-     - `TaskRepositoryPort`, `ProjectRepositoryPort`
+     - `TaskRepositoryPort`, `ProjectRepositoryPort`, `CommentRepositoryPort`
      - `CachePort`
      - `JobQueuePort`
      - `NotificationPort`
@@ -219,7 +229,7 @@ Xây dựng tầng Domain tinh khiết không phụ thuộc vào bất kỳ fram
 ```python
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Protocol
@@ -238,12 +248,21 @@ class TaskEntity:
     title: str
     owner_id: str
     status: TaskStatus = TaskStatus.TODO
-    created_at: datetime = dataclass(default_factory=lambda: datetime.now(UTC))  # type: ignore[assignment]
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     def complete(self) -> None:
         if self.status == TaskStatus.DONE:
             raise ValueError("Task đã ở trạng thái hoàn thành!")
         self.status = TaskStatus.DONE
+
+
+@dataclass(slots=True)
+class CommentEntity:
+    id: str | None
+    task_id: str
+    author_id: str
+    content: str
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class TaskRepositoryPort(Protocol):
@@ -261,6 +280,15 @@ class TaskRepositoryPort(Protocol):
         cursor_id: str | None,
         limit: int,
     ) -> tuple[list[TaskEntity], bool]:
+        ...
+
+
+class CommentRepositoryPort(Protocol):
+
+    async def create(self, comment: CommentEntity) -> CommentEntity:
+        ...
+
+    async def list_by_task(self, task_id: str) -> list[CommentEntity]:
         ...
 ```
 

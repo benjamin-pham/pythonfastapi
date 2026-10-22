@@ -115,6 +115,26 @@ Dự án OWASP (Open Web Application Security Project) định kỳ cập nhật
 
 ---
 
+### 3. Tự động hóa kiểm tra an ninh trong CI/CD: Bandit (SAST) & pip-audit (SCA)
+
+Là một Senior Engineer, bạn không thể trông chờ vào việc rà soát thủ công (Manual Code Review) để bắt mọi lỗ hổng bảo mật. Quy trình CI/CD phải được trang bị hai công cụ phòng thủ tự động (Shift-Left Security):
+
+#### 3.1 Static Application Security Testing (SAST) với `bandit`
+- **Nguyên lý hoạt động**: `bandit` duyệt cây cú pháp trừu tượng (Abstract Syntax Tree - AST) của mã nguồn Python để tìm kiếm các mẫu mã độc hại hoặc tiềm ẩn nguy cơ an ninh:
+  - B101: Dùng lệnh `assert` trong mã nguồn production (bị bỏ qua khi chạy với flag `-O`).
+  - B105 / B106: Hardcode mật khẩu hoặc token bí mật trong mã nguồn.
+  - B301 / B303: Dùng module không an toàn như `pickle`, `MD5`, `SHA1`.
+  - B608: Ghép chuỗi SQL thô (SQL Injection).
+  - B310: Mở URL tùy tiện không an toàn (nguy cơ SSRF).
+- **Lệnh chạy chuẩn**: `uv run bandit -r app/ -ll -ii` (quét toàn bộ thư mục `app/`, lọc mức độ nghiêm trọng từ Medium/High trở lên).
+
+#### 3.2 Software Composition Analysis (SCA) với `pip-audit`
+- **Nguyên lý hoạt động**: `pip-audit` phân tích cây phụ thuộc trong môi trường hoặc lockfile (`pyproject.toml`, `requirements.txt`), đối chiếu với cơ sở dữ liệu lỗ hổng an ninh đã công bố (PyPI Advisory Database / OSV / CVE).
+- **Lợi ích**: Phát hiện ngay lập tức các phiên bản thư viện bên thứ ba đang dính lỗ hổng đã được công bố (RCE, DoS, Memory Corruption).
+- **Lệnh chạy chuẩn**: `uv run pip-audit --strict` (trả mã thoát khác 0 và chặn merge PR nếu phát hiện lỗ hổng đã biết).
+
+---
+
 ## 💻 Ví dụ thực hành
 
 ### 1. Phòng thủ BOLA với Resource-Level Authorization & Service Layer
@@ -368,6 +388,49 @@ async def security_headers_middleware(request: Request, call_next: Callable) -> 
     response.headers["X-XSS-Protection"] = "1; mode=block"
 
     return response
+```
+
+---
+
+### 4. Tự động hóa kiểm định an ninh với Bandit và Pip-Audit trong CI/CD Pipeline
+
+Dưới đây là một cấu hình GitHub Actions Workflow hoàn chỉnh (`.github/workflows/security.yml`) để tích hợp quét SAST và SCA tự động:
+
+```yaml
+name: Security Audit & SAST Scan
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  security-audit:
+    name: Run Bandit SAST & Pip-Audit SCA
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Quét lỗ hổng mã nguồn (SAST với Bandit)
+        run: |
+          uv run --with bandit bandit -r app/ -ll -ii --format screen
+
+      - name: Quét lỗ hổng thư viện phụ thuộc (SCA với pip-audit)
+        run: |
+          uv run --with pip-audit pip-audit --desc on
 ```
 
 ---

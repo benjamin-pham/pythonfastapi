@@ -114,17 +114,21 @@ Minh họa việc khởi tạo `TracerProvider`, gắn `BatchSpanProcessor` xu�
 ```python
 from __future__ import annotations
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+from opentelemetry.instrumentation.redis import RedisInstrumentor
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
     BatchSpanProcessor,
     ConsoleSpanExporter,
 )
+from sqlalchemy.ext.asyncio import create_async_engine
 
 
 def setup_telemetry() -> TracerProvider:
@@ -152,6 +156,7 @@ def setup_telemetry() -> TracerProvider:
 
 
 tracer_provider = setup_telemetry()
+db_engine = create_async_engine("sqlite+aiosqlite:///:memory:")
 
 
 @asynccontextmanager
@@ -164,8 +169,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(title="TaskFlow Observability API", lifespan=lifespan)
 
-# Tự động đo đạc toàn bộ requests của FastAPI
+# 1. Tự động đo đạc toàn bộ HTTP requests của FastAPI
 FastAPIInstrumentor.instrument_app(app, tracer_provider=tracer_provider)
+
+# 2. Tự động đo đạc các câu lệnh SQL qua SQLAlchemy Engine
+SQLAlchemyInstrumentor().instrument(engine=db_engine.sync_engine)
+
+# 3. Tự động đo đạc toàn bộ thao tác gọi Redis
+RedisInstrumentor().instrument()
+
+# 4. Tự động lan truyền W3C traceparent header khi gọi HTTP ra dịch vụ ngoài qua HTTPX
+HTTPXClientInstrumentor().instrument()
 
 
 @app.get("/api/v1/ping")
@@ -325,11 +339,11 @@ Dữ liệu trong `/metrics` chứa rất nhiều thông tin nhạy cảm về k
 
 ## ✍️ Bài tập thực hành
 
-### Bài tập 1: Tự động đính kèm `trace_id` vào Structured JSON Logger
-Viết một hàm định dạng log (Log Formatter) hoặc Context Processor:
+### Bài tập 1: Tự động đính kèm `trace_id` vào Structured JSON Logger với `structlog`
+Viết một custom context processor cho thư viện `structlog`:
 1. Trích xuất active span từ OpenTelemetry: `span = trace.get_current_span()`.
 2. Nếu span đang hoạt động, lấy `trace_id` và `span_id` (chuyển sang chuỗi hex 32 ký tự và 16 ký tự).
-3. Đính kèm chúng vào mọi log record JSON được ghi ra `stdout`.
+3. Đính kèm chúng vào mọi log event JSON được ghi ra `stdout` qua `structlog`.
 
 <details>
 <summary>💡 Gợi ý</summary>
@@ -337,34 +351,45 @@ Viết một hàm định dạng log (Log Formatter) hoặc Context Processor:
 ```python
 from __future__ import annotations
 
-import json
-import logging
 from typing import Any
 from opentelemetry import trace
+import structlog
 
 
-class JsonTraceFormatter(logging.Formatter):
+def add_opentelemetry_context(
+    logger: structlog.types.WrappedLogger,
+    method_name: str,
+    event_dict: structlog.types.EventDict,
+) -> structlog.types.EventDict:
+    """Processor tự động trích xuất Trace ID và Span ID từ active OTel span."""
+    span = trace.get_current_span()
+    span_ctx = span.get_span_context()
 
-    def format(self, record: logging.LogRecord) -> str:
-        log_payload: dict[str, Any] = {
-            "timestamp": record.created,
-            "level": record.levelname,
-            "message": record.getMessage(),
-            "logger": record.name,
-        }
+    if span_ctx.is_valid:
+        event_dict["trace_id"] = format(span_ctx.trace_id, "032x")
+        event_dict["span_id"] = format(span_ctx.span_id, "016x")
+    else:
+        event_dict["trace_id"] = None
+        event_dict["span_id"] = None
 
-        # Lấy TraceContext từ OTel
-        span = trace.get_current_span()
-        span_ctx = span.get_span_context()
+    return event_dict
 
-        if span_ctx.is_valid:
-            log_payload["trace_id"] = format(span_ctx.trace_id, "032x")
-            log_payload["span_id"] = format(span_ctx.span_id, "016x")
-        else:
-            log_payload["trace_id"] = None
-            log_payload["span_id"] = None
 
-        return json.dumps(log_payload)
+# Cấu hình pipeline chuẩn cho structlog
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        add_opentelemetry_context,
+        structlog.processors.JSONRenderer(),
+    ],
+    logger_factory=structlog.PrintLoggerFactory(),
+)
+
+logger = structlog.get_logger()
+# Khi gọi logger.info("Order processed", order_id=1024)
+# Log in ra có dạng: {"timestamp": "...", "level": "info", "event": "Order processed", "order_id": 1024, "trace_id": "...", "span_id": "..."}
 ```
 </details>
 

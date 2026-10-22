@@ -160,6 +160,39 @@ Một Senior Engineer hiểu rằng: **Con người luôn luôn có thể mắc 
 
 ---
 
+### 6. Quản trị & Trả nợ Kỹ thuật (Technical Debt Management)
+
+Mọi hệ thống phần mềm sống đều tích lũy Nợ kỹ thuật (Technical Debt). Tương tự như vay nợ tài chính, một khoản nợ kỹ thuật có chủ đích giúp bạn release sản phẩm nhanh hơn để chiếm lĩnh thị trường, nhưng bạn bắt buộc phải trả lãi suất (thời gian maintain code lâu hơn, bug xuất hiện thường xuyên hơn, chi phí onboarding nhân viên mới tăng cao).
+
+#### 6.1 Ma trận Nợ Kỹ thuật (Martin Fowler's Tech Debt Quadrant)
+| Phân loại | Thận trọng (Prudent) | Cẩu thả (Reckless) |
+|---|---|---|
+| **Cố ý (Deliberate)** | *"Chúng ta phải ship tính năng này ngay hôm nay, và đã tạo sẵn 2 backlog tickets để refactor lại tầng Data Layer trong sprint tới."* $\to$ **Nợ tốt, có kiểm soát.** | *"Không có thời gian viết test hay thiết kế kiến trúc đâu, cứ copy-paste code chạy được là được!"* $\to$ **Tội đồ công nghệ.** |
+| **Vô tình (Inadvertent)** | *"Bây giờ khi hệ thống đạt 100k người dùng, chúng ta mới nhận ra cấu trúc database trước đây chưa tối ưu cho read-heavy."* $\to$ **Sự tiến hóa tự nhiên của phần mềm.** | *"Nhóm không biết design pattern là gì nên viết 1 file route dài 3,000 dòng code."* $\to$ **Thiếu năng lực chuyên môn.** |
+
+#### 6.2 Chiến lược đàm phán với Product Owner & Stakeholders
+1. **Quy tắc ngân sách 20% (The 20% Budget Rule)**: Luôn dành cố định 15%–20% capacity của mỗi sprint cho các đầu việc refactor, nâng cấp thư viện, viết thêm test, và tối ưu hiệu năng.
+2. **Nói bằng ngôn ngữ Kinh doanh (Business Language)**: Đừng bao giờ nói *"Tôi muốn refactor code cho đẹp"*. Hãy nói: *"Nếu chúng ta dành 3 ngày để tách nhỏ module này, tốc độ phát triển các tính năng thanh toán tiếp theo sẽ tăng 30% và giảm 80% rủi ro lỗi giao dịch trên production"*.
+3. **Định kỳ dọn dẹp (Boy Scout Rule)**: Mỗi lần sửa một file, hãy để lại file đó sạch đẹp và gọn gàng hơn một chút so với lúc bạn mở nó ra.
+
+---
+
+### 7. Nghệ thuật Kèm cặp & Phát triển Đội ngũ (Mentoring & Team Enablement)
+
+Thước đo giá trị của một Senior Engineer không nằm ở số dòng code bạn viết, mà nằm ở **năng lực của cả đội ngũ mà bạn đã nâng tầm (Multiplying Effect)**.
+
+#### 7.1 Nguyên tắc Kèm cặp Hiệu quả:
+- **Dẫn dắt bằng Tầm ảnh hưởng (Lead by Influence, not Authority)**: Thuyết phục đồng nghiệp bằng dữ liệu, benchmark, tài liệu ADR rõ ràng và sự kiên nhẫn, thay vì áp đặt quyền lực cấp bậc.
+- **Pair Programming có mục đích (Driver - Navigator)**:
+  - Khi pair với Junior/Middle, để họ cầm bàn phím (Driver - người gõ code), còn bạn đóng vai trò định hướng kiến trúc (Navigator - người quan sát và đặt câu hỏi gợi mở).
+  - Đừng bao giờ giật lấy bàn phím để gõ hộ! Hãy để họ tự trải nghiệm và tư duy giải quyết vấn đề.
+- **Trao quyền kèm Mạng an toàn (Empowerment with Safety Nets)**: Giao các bài toán thiết kế khó cho Middle Developer, nhưng thiết lập sẵn các chốt chặn an toàn: CI linting, pytest automated coverage, staging environment, và code review đa chiều.
+- **Hỗ trợ đồng nghiệp C# / .NET chuyển ngữ sang Python**:
+  - Tôn trọng và tận dụng nền tảng OOP và tư duy thiết kế bài bản của họ từ hệ sinh thái .NET.
+  - Hướng dẫn họ gỡ bỏ các nghi thức dư thừa (như tạo `interface` cho mọi class dù chỉ có 1 implementation), chuyển sang sử dụng `typing.Protocol` (Duck Typing có type checking), và cảnh báo các cạm bẫy đặc thù của Python (GIL, mutable default arguments, dynamic binding).
+
+---
+
 ## 💻 Ví dụ thực hành
 
 ### 1. Bản mẫu ADR hoàn chỉnh (Architecture Decision Record)

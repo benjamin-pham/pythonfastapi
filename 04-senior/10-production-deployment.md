@@ -362,6 +362,12 @@ spec:
             limits:
               cpu: "1000m"
               memory: "512Mi"
+          # Nạp biến môi trường từ ConfigMap và Secret an toàn
+          envFrom:
+            - configMapRef:
+                name: taskflow-api-config
+            - secretRef:
+                name: taskflow-api-secret
           # Khởi động ứng dụng
           startupProbe:
             httpGet:
@@ -416,6 +422,26 @@ spec:
         target:
           type: Utilization
           averageUtilization: 70
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskflow-api-config
+data:
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  PORT: "8000"
+  ALLOWED_HOSTS: "taskflow.company.com,api.taskflow.com"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: taskflow-api-secret
+type: Opaque
+stringData:
+  DATABASE_URL: "postgresql+asyncpg://app_user:StrongPassword2026!@postgres-ha.database:5432/taskflow_prod"
+  REDIS_URL: "redis://:RedisAuthPass2026@redis-cluster.database:6379/0"
+  SECRET_KEY: "super_secret_jwt_encryption_key_change_in_vault"
 ```
 
 ---
