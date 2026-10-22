@@ -1026,7 +1026,7 @@ git commit -m "docs(junior): author FastAPI lessons 05-09 and project milestone 
 - Consumes: Kiến thức Level 02 Junior.
 - Produces: Mục lục Level 03 và 6 bài học đầu của Level 03 (Async, Database, Layering, AuthN/AuthZ).
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
+- [x] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
 
 Run:
 ```bash
@@ -1034,7 +1034,7 @@ python3 -m tools.check_docs --no-stub 03-middle/README.md 03-middle/01-async-asy
 ```
 Expected: FAIL với 7 lỗi `still a stub`.
 
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
 
 Yêu cầu nội dung cụ thể:
 1. `03-middle/README.md`:
@@ -1053,7 +1053,7 @@ Yêu cầu nội dung cụ thể:
 7. `03-middle/06-authorization.md`:
    - Phân biệt Authentication (`401 Unauthorized`) và Authorization (`403 Forbidden`); Role-Based Access Control (RBAC) bằng dependency factory `require_roles(Role.ADMIN, Role.MANAGER)` (↔ `[Authorize(Roles = "...")]`); kiểm tra quyền sở hữu tài nguyên (Resource-based / Policy-based authorization: chỉ chủ project hoặc assignee mới sửa được task).
 
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
 
 Run:
 ```bash
@@ -1062,7 +1062,7 @@ python3 -m tools.check_docs --no-stub 03-middle/README.md 03-middle/01-async-asy
 ```
 Expected: `check_docs: 0 error(s) in 61 pages`
 
-- [ ] **Step 4: Commit Task 7**
+- [x] **Step 4: Commit Task 7**
 
 ```bash
 git add 03-middle/
