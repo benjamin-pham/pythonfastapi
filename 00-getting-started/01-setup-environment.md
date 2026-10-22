@@ -181,6 +181,7 @@ Tạo hoặc cập nhật file `main.py` với nội dung sau:
 
 ```python
 import sys
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -318,6 +319,7 @@ Trong dự án `taskflow-starter`, hãy tạo file `inspect_runtime.py`. Sử d�
 
 ```python
 import sys
+
 from rich.console import Console
 from rich.table import Table
 
@@ -330,8 +332,10 @@ def main() -> None:
     table.add_column("Phân loại", style="green")
 
     for idx, path in enumerate(sys.path, start=1):
-        if "site-packages" in path:
+        if ".venv" in path and "site-packages" in path:
             category = "[bold green]Virtualenv Packages[/bold green]"
+        elif "site-packages" in path:
+            category = "[yellow]Global / System Packages[/yellow]"
         elif ".venv" in path:
             category = "[bold blue]Virtualenv Core[/bold blue]"
         else:

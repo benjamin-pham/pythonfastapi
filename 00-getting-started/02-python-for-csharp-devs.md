@@ -436,10 +436,8 @@ Hãy viết lại class `BankAccount` chuẩn Pythonic:
 ```python
 class BankAccount:
     def __init__(self, account_number: str, initial_balance: float = 0.0) -> None:
-        if initial_balance < 0:
-            raise ValueError("Số dư ban đầu không thể âm")
         self._account_number = account_number
-        self._balance = initial_balance
+        self.balance = initial_balance  # Tận dụng setter bên dưới để validate DRY!
 
     @property
     def account_number(self) -> str:
