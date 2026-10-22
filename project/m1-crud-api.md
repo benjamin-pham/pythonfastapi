@@ -726,7 +726,14 @@ from app.core.exceptions import (
     validation_error_handler,
 )
 from app.schemas.project import ProjectCreate, ProjectRead
-from app.schemas.task import TaskCreate, TaskListResponse, TaskRead, TaskUpdate
+from app.schemas.task import (
+    TaskCreate,
+    TaskListResponse,
+    TaskPriority,
+    TaskRead,
+    TaskStatus,
+    TaskUpdate,
+)
 from app.services.project import ProjectService, get_project_service
 from app.services.task import TaskService, get_task_service
 
