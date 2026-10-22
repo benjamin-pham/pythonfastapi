@@ -256,6 +256,8 @@ class RoutingAsyncSession(AsyncSession):
         *args: Any,
         **kwargs: Any,
     ) -> None:
+        # Loại bỏ bind do async_sessionmaker tự động inject để tránh TypeError multiple values
+        kwargs.pop("bind", None)
         super().__init__(bind=write_engine, *args, **kwargs)
         self.write_engine = write_engine
         self.read_engine = read_engine
@@ -494,6 +496,10 @@ async def process_outbox_batch(session: AsyncSession, publisher_func) -> int:
         if not messages:
             return 0
 
+        # Mẹo Senior: Trong hệ thống throughput cực cao, việc giữ row-lock trong DB
+        # xuyên suốt quá trình gọi mạng (publisher_func) có thể gây nghẽn Connection Pool
+        # nếu broker bị lag. Khi đó, nên chia nhỏ thành 2 giai đoạn: lock và đánh dấu 'PROCESSING',
+        # commit ngay, sau đó bắn mạng và cập nhật 'PUBLISHED' ở transaction thứ hai.
         for msg in messages:
             await publisher_func(msg.event_type, msg.payload)
             msg.status = "PUBLISHED"

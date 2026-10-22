@@ -376,6 +376,17 @@ class RealtimePubSubBackplane:
         self.redis = redis_client
         self.local_subscribers: dict[str, set[Any]] = {}
 
+    def subscribe(self, project_id: str, ws: Any) -> None:
+        """Đăng ký WebSocket client vào phòng project của Pod hiện tại."""
+        self.local_subscribers.setdefault(project_id, set()).add(ws)
+
+    def unsubscribe(self, project_id: str, ws: Any) -> None:
+        """Hủy đăng ký WebSocket client khi ngắt kết nối."""
+        if project_id in self.local_subscribers:
+            self.local_subscribers[project_id].discard(ws)
+            if not self.local_subscribers[project_id]:
+                del self.local_subscribers[project_id]
+
     async def broadcast_event(self, project_id: str, event_data: dict[str, Any]) -> None:
         """Phát tán sự kiện vào Redis Channel dùng chung cho mọi Pods."""
         channel_name = f"channel:project:{project_id}"

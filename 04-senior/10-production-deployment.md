@@ -511,7 +511,7 @@ Description=TaskFlow FastAPI Production Service
 After=network.target
 
 [Service]
-Type=notify
+Type=exec
 User=www-data
 Group=www-data
 WorkingDirectory=/var/www/taskflow

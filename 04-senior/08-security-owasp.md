@@ -312,6 +312,10 @@ async def send_secure_webhook(webhook_url: str, payload: dict[str, str]) -> int:
     validate_public_url(webhook_url)
 
     # Bước 2: Gọi HTTP với timeout nghiêm ngặt và cấm follow redirects
+    # Lưu ý kiến trúc Senior: Để chống triệt để tấn công DNS Rebinding (TOCTOU - Time Of Check to Time Of Use)
+    # khi hacker cấu hình DNS server với TTL=0 (trả về IP public lúc validate nhưng trả về 169.254.169.254
+    # lúc gọi HTTP), giải pháp triệt để là sử dụng Custom HTTP Transport thực hiện DNS Pinning
+    # (kết nối trực tiếp tới IP đã được thẩm định qua socket và truyền hostname gốc vào header 'Host').
     async with httpx.AsyncClient(timeout=5.0, follow_redirects=False) as client:
         try:
             response = await client.post(webhook_url, json=payload)

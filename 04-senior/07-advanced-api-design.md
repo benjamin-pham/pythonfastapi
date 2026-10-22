@@ -359,7 +359,8 @@ redis.call('ZREMRANGEBYSCORE', key, 0, clear_before)
 
 local current_requests = redis.call('ZCARD', key)
 if current_requests < limit then
-    redis.call('ZADD', key, now, now)
+    local member = now .. ":" .. current_requests
+    redis.call('ZADD', key, now, member)
     redis.call('EXPIRE', key, window)
     return {1, limit - current_requests - 1, window}
 else

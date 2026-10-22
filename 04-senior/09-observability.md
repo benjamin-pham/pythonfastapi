@@ -284,14 +284,22 @@ async def prometheus_metrics_middleware(request: Request, call_next: Callable) -
         return await call_next(request)
 
     method = request.method
-    endpoint = request.url.path
+    endpoint = request.url.path  # Giá trị fallback nếu request không khớp route nào (404)
     start_time = time.perf_counter()
 
     try:
         response: Response = await call_next(request)
         status_code = str(response.status_code)
+        # ✅ CHUẨN SENIOR: Lấy parameterized route template (ví dụ /tasks/{id}) thay vì raw URL path
+        # để triệt tiêu hoàn toàn thảm họa bùng nổ dữ liệu nhãn (High-Cardinality Metric Trap)
+        route = request.scope.get("route")
+        if route and hasattr(route, "path"):
+            endpoint = route.path
     except Exception as exc:
         status_code = "500"
+        route = request.scope.get("route")
+        if route and hasattr(route, "path"):
+            endpoint = route.path
         raise exc from None
     finally:
         duration = time.perf_counter() - start_time
