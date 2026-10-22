@@ -99,6 +99,7 @@ Hệ thống TaskFlow M2 quản lý 3 thực thể cốt lõi: **`User`**, **`Pr
    - **SQLAlchemy 2.0+** hoàn toàn ở chế độ `async` với driver **`asyncpg`**.
    - **Alembic** để tự động sinh và thực thi database migrations (`alembic revision --autogenerate`, `alembic upgrade head`).
    - **`pwdlib[argon2]`** cho việc băm và kiểm tra mật khẩu; **`pyjwt`** để mã hóa/giải mã token JWT.
+   - **`python-multipart`** để xử lý `application/x-www-form-urlencoded` cho `OAuth2PasswordRequestForm`.
 2. **Kiến trúc Phân tầng Clean Architecture**:
    - `models/`: Định nghĩa các bảng database sử dụng cú pháp `Mapped[...]` và `mapped_column(...)`.
    - `schemas/`: Hợp đồng dữ liệu request/response rõ ràng.
@@ -270,12 +271,16 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         try:
             yield session
         finally:
             await session.close()
+
+
+# Alias tương thích
+get_db_session = get_db
 ```
 
 ### Bước 3: Bảo mật Mật khẩu & JWT Token (`app/core/security.py`)
@@ -503,7 +508,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt import PyJWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import get_db_session
+from app.core.database import get_db
 from app.core.security import decode_jwt_token
 from app.models.user import User, UserRole
 
@@ -512,7 +517,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    session: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -521,6 +526,8 @@ async def get_current_user(
     )
     try:
         payload = decode_jwt_token(token)
+        if payload.get("type") != "access":
+            raise credentials_exception
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
@@ -558,7 +565,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, get_db_session
+from app.api.deps import get_current_user, get_db
 from app.core.config import settings
 from app.core.security import (
     create_jwt_token,
@@ -575,7 +582,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def register(
     payload: UserCreate,
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    session: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
     # 1. Kiểm tra email trùng
     stmt = select(User).where(User.email == payload.email)
@@ -602,7 +609,7 @@ async def register(
 @router.post("/login", response_model=TokenResponse)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: Annotated[AsyncSession, Depends(get_db_session)],
+    session: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
     # form_data.username chính là email đăng nhập
     stmt = select(User).where(User.email == form_data.username)
@@ -621,7 +628,7 @@ async def login(
     access_token = create_jwt_token(
         subject=user.id,
         expires_delta=access_delta,
-        additional_claims={"role": user.role.value, "email": user.email},
+        additional_claims={"type": "access", "role": user.role.value, "email": user.email},
     )
     refresh_token = create_jwt_token(
         subject=user.id,

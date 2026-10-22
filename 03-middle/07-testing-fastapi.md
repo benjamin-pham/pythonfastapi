@@ -156,8 +156,11 @@ Dưới đây là kiến trúc bộ kiểm thử hoàn chỉnh cho một ứng d
 
 ```python
 from collections.abc import AsyncGenerator
-import pytest
+import os
+from typing import Any
+
 from httpx import ASGITransport, AsyncClient
+import pytest
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,
     AsyncEngine,
@@ -165,6 +168,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import StaticPool
 
 # Giả định import từ cấu trúc dự án thực tế
 from app.api.deps import get_current_user, get_db
@@ -173,14 +177,20 @@ from app.main import app
 from app.models.base import Base
 from app.models.user import User, UserRole
 
-# Sử dụng database test chuyên biệt (ví dụ SQLite in-memory hoặc PostgreSQL test container)
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+# Sử dụng database test từ môi trường (PostgreSQL trong CI) hoặc fallback sang SQLite in-memory (khi test cục bộ)
+TEST_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
 
 @pytest.fixture(scope="session")
 async def test_engine() -> AsyncGenerator[AsyncEngine, None]:
     """Tạo Engine cho toàn bộ phiên kiểm thử, khởi tạo schema bảng."""
-    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+    engine_kwargs: dict[str, Any] = {"echo": False}
+    if TEST_DATABASE_URL.startswith("sqlite"):
+        engine_kwargs.update({
+            "connect_args": {"check_same_thread": False},
+            "poolclass": StaticPool,
+        })
+    engine = create_async_engine(TEST_DATABASE_URL, **engine_kwargs)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield engine
@@ -207,13 +217,11 @@ async def db_session(
     """Tạo AsyncSession gắn chặt với connection và tự động rollback qua savepoint."""
     session_factory = async_sessionmaker(
         bind=db_connection,
+        join_transaction_mode="create_savepoint",
         expire_on_commit=False,
     )
     async with session_factory() as session:
-        # Bắt đầu một savepoint lồng nhau (nested savepoint)
-        await session.begin_nested()
         yield session
-        # Sau khi test kết thúc, session tự đóng và fixture db_connection sẽ rollback
 
 
 @pytest.fixture
@@ -252,10 +260,11 @@ def mock_user() -> User:
 async def auth_client(
     client: AsyncClient,
     mock_user: User,
-) -> AsyncClient:
-    """Client đã được chứng thực danh tính (đăng nhập thành công)."""
+) -> AsyncGenerator[AsyncClient, None]:
+    """Client đã được chứng thực danh tính (đăng nhập thành công), dọn dẹp override khi teardown."""
     app.dependency_overrides[get_current_user] = lambda: mock_user
-    return client
+    yield client
+    app.dependency_overrides.pop(get_current_user, None)
 ```
 
 ### 2. Viết Integration Test cho chức năng Task: `tests/test_tasks.py`

@@ -271,7 +271,8 @@ from sqlalchemy import asc, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_db
 from app.models.task import Task
-from app.schemas.common import Page, SortOrder, TaskFilterParams, TaskRead, TaskSortField
+from app.schemas.common import Page, SortOrder
+from app.schemas.task import TaskFilterParams, TaskRead, TaskSortField
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -420,9 +421,9 @@ router = APIRouter()
 
 @router.get("/tasks/cursor", response_model=CursorPageResponse)
 async def list_tasks_cursor(
+    session: Annotated[AsyncSession, Depends(get_db)],
     cursor: Annotated[int | None, Query(description="ID cuối của trang trước")] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
-    session: Annotated[AsyncSession, Depends(get_db)] = None,  # type: ignore[assignment]
 ) -> CursorPageResponse:
     # Lấy dư thêm 1 bản ghi để kiểm tra xem có còn trang tiếp theo không
     stmt = select(Task)

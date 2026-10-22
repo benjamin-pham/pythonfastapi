@@ -163,7 +163,7 @@ import time
 import uuid
 from collections.abc import Callable
 from fastapi import FastAPI, Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 app = FastAPI()
 
@@ -250,7 +250,7 @@ import uuid
 from fastapi import BackgroundTasks, Depends, FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 
 # 1. Lifespan quản lý tài nguyên
@@ -279,13 +279,13 @@ app.add_middleware(
 class TimingAndRequestIdMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(
-        self, request: Request, call_next: object
+        self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         req_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         request.state.request_id = req_id
         start_time = time.perf_counter()
 
-        response = await call_next(request)  # type: ignore[operator]
+        response = await call_next(request)
 
         duration = time.perf_counter() - start_time
         response.headers["X-Request-ID"] = req_id
@@ -402,7 +402,7 @@ Hãy viết một Custom Middleware kiểm tra `request.client.host`. Nếu đ�
 from collections.abc import Callable
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 BLOCKED_IPS = {"192.168.1.100", "10.0.0.99"}
 

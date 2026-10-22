@@ -165,6 +165,17 @@ class JSONFormatter(logging.Formatter):
         if record.exc_info and record.exc_info[1]:
             log_obj["exception"] = self.formatException(record.exc_info)
 
+        # Thu thập các trường dữ liệu ngữ cảnh truyền qua tham số extra={...}
+        standard_attrs = {
+            "args", "asctime", "created", "exc_info", "exc_text", "filename",
+            "funcName", "levelname", "levelno", "lineno", "module", "msecs",
+            "message", "msg", "name", "pathname", "process", "processName",
+            "relativeCreated", "stack_info", "thread", "threadName",
+        }
+        for key, val in record.__dict__.items():
+            if key not in standard_attrs and not key.startswith("_"):
+                log_obj[key] = val
+
         return json.dumps(log_obj, ensure_ascii=False)
 
 

@@ -181,9 +181,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN groupadd -g 1000 appgroup && \
     useradd -u 1000 -g appgroup -m -s /bin/bash appuser
 
-# 2. Copy virtualenv và mã nguồn từ Stage builder sang
+# 2. Copy mã nguồn ứng dụng và virtualenv sạch từ Stage builder
+COPY --chown=appuser:appgroup . /app
 COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
-COPY --from=builder --chown=appuser:appgroup /app /app
 
 # 3. Chuyển sang người dùng an toàn
 USER appuser
