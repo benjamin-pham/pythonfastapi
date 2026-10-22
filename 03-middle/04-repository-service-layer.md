@@ -215,8 +215,13 @@ class ProjectNotFoundError(DomainError):
 
 ### 2. Tầng Data Access: Repositories & Unit of Work
 
+> [!TIP]
+> **Dịch chuyển ranh giới Transaction:** Trong bài học trước ([02. SQLAlchemy 2.0 ORM](./02-sqlalchemy-orm.md)), hàm `get_db()` tự động commit cuối mỗi request. Khi áp dụng kiến trúc phân tầng với Unit of Work, `get_db_session()` sẽ **không** commit tự động nữa — ranh giới commit thuộc về `UnitOfWork` để bảo toàn tính toàn vẹn nghiệp vụ (ACID) qua nhiều thao tác.
+
 ```python
+from types import TracebackType
 from typing import Self
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -252,21 +257,28 @@ class UnitOfWork:
         self.session = session
         self.projects = ProjectRepository(session)
         self.tasks = TaskRepository(session)
+        self._committed = False
 
     async def __aenter__(self) -> Self:
+        self._committed = False
         return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        if exc_type is not None:
-            # Nếu có lỗi trong khối with, tự động rollback toàn bộ
-            await self.rollback()
-        # Lưu ý: commit phải được gọi tường minh khi hoàn thành
 
     async def commit(self) -> None:
         await self.session.commit()
+        self._committed = True
 
     async def rollback(self) -> None:
         await self.session.rollback()
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        if exc_type is not None or not self._committed:
+            # Nếu có lỗi hoặc không gọi commit tường minh, tự động rollback để bảo toàn ACID
+            await self.rollback()
 ```
 
 ### 3. Tầng Business Logic: Service Layer

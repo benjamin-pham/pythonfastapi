@@ -83,6 +83,7 @@ JWT là một chuỗi mã hóa gồm 3 phần được phân tách bởi dấu c
    - `sub` (Subject): Mã định danh duy nhất của người dùng (ID hoặc email).
    - `exp` (Expiration Time): Thời điểm token hết hạn (Unix timestamp).
    - `type`: Phân loại token (`"access"` hoặc `"refresh"`).
+   - `jti` (JWT ID): Mã định danh duy nhất của từng token (thường sinh ngẫu nhiên qua `uuid.uuid4()`), đóng vai trò then chốt khi triển khai danh sách đen (Blacklist / Revocation list) trong Redis để thu hồi token trước hạn.
 3. **Signature (Chữ ký điện tử)**: Được tạo ra bằng cách băm kết hợp `Header + Payload` cùng một chuỗi bí mật (`SECRET_KEY`) ở phía server. Nhờ chữ ký này, client không thể chỉnh sửa payload mà không làm hỏng token.
 
 ### 3. Chiến lược Access Token & Refresh Token
@@ -142,6 +143,8 @@ Dưới đây là mã nguồn hoàn chỉnh của một hệ thống xác thực
 ```python
 from datetime import UTC, datetime, timedelta
 from typing import Any
+import uuid
+
 import jwt
 from pwdlib import PasswordHash
 
@@ -178,6 +181,7 @@ def create_token(
         "iat": now,
         "exp": expire,
         "type": token_type,
+        "jti": str(uuid.uuid4()),
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 

@@ -49,7 +49,8 @@ Trong SQLAlchemy 2.0, toàn bộ hệ thống được tái cấu trúc dựa tr
 
 ```python
 from datetime import datetime
-from sqlalchemy import ForeignKey, String, Text
+
+from sqlalchemy import ForeignKey, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -65,7 +66,7 @@ class Project(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, default=None)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     # Quan hệ 1-N: 1 Project có nhiều Task
     tasks: Mapped[list["Task"]] = relationship(
@@ -93,7 +94,13 @@ class Task(Base):
 
 ### 2. Async Engine & AsyncSession: Vai trò sống còn của `expire_on_commit=False`
 
-Để làm việc bất đồng bộ với cơ sở dữ liệu (ví dụ PostgreSQL), bạn cần cài driver async tương ứng (phổ biến nhất là `asyncpg`):
+Để làm việc bất đồng bộ với cơ sở dữ liệu (ví dụ PostgreSQL), bạn cần cài SQLAlchemy kèm module `asyncio` (chứa thư viện `greenlet`) và driver async tương ứng (phổ biến nhất là `asyncpg`):
+
+```bash
+pip install "sqlalchemy[asyncio]" asyncpg
+```
+
+Sau đó khởi tạo engine và session maker:
 
 ```python
 from collections.abc import AsyncGenerator
@@ -222,7 +229,8 @@ Dưới đây là một mô-đun hoàn chỉnh kết nối cơ sở dữ liệu 
 import asyncio
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from sqlalchemy import ForeignKey, String, select
+
+from sqlalchemy import ForeignKey, String, func, select
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -240,7 +248,7 @@ class Project(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     tasks: Mapped[list["Task"]] = relationship(
         back_populates="project",

@@ -214,6 +214,12 @@ class Project(Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
 
+class ProjectResponse(BaseModel):
+    id: int
+    name: str
+    owner_id: int
+
+
 # ==========================================
 # 2. HẠ TẦNG KẾT NỐI & AUTH DEPENDENCY
 # ==========================================
@@ -313,7 +319,7 @@ async def delete_project(
     await session.commit()
 
 
-@router.get("/admin/all-system-projects")
+@router.get("/admin/all-system-projects", response_model=list[ProjectResponse])
 async def list_all_system_projects(
     admin_user: Annotated[User, Depends(require_roles(UserRole.ADMIN))],
     session: Annotated[AsyncSession, Depends(get_db)],
