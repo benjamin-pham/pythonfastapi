@@ -1086,7 +1086,7 @@ git commit -m "docs(middle): author level 03 README and lessons 01-06"
 - Consumes: Bài 01–06 của Level 03.
 - Produces: Hoàn tất toàn bộ Level 03 Middle và Milestone M2 của dự án TaskFlow.
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
+- [x] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
 
 Run:
 ```bash
@@ -1094,7 +1094,7 @@ python3 -m tools.check_docs --no-stub 03-middle/07-testing-fastapi.md 03-middle/
 ```
 Expected: FAIL với 7 lỗi `still a stub`.
 
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
 
 Yêu cầu nội dung cụ thể:
 1. `03-middle/07-testing-fastapi.md`:
@@ -1112,7 +1112,7 @@ Yêu cầu nội dung cụ thể:
 7. `project/m2-production-api.md` (theo đúng template Milestone dự án):
    - Nâng cấp **TaskFlow API lên M2 (Production-Ready)**: chuyển toàn bộ lưu trữ sang PostgreSQL + SQLAlchemy 2.0 async + Alembic, thêm bảng `users` và luồng đăng ký/đăng nhập JWT, phân quyền trên Project & Task, phân trang/lọc/sắp xếp, structured logging, `Dockerfile` + `compose.yaml`, bộ integration test với `AsyncClient`, và pipeline GitHub Actions xanh.
 
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
 
 Run:
 ```bash
@@ -1121,7 +1121,7 @@ python3 -m tools.check_docs --no-stub 03-middle/07-testing-fastapi.md 03-middle/
 ```
 Expected: `check_docs: 0 error(s) in 61 pages`
 
-- [ ] **Step 4: Commit Task 8**
+- [x] **Step 4: Commit Task 8**
 
 ```bash
 git add 03-middle/ project/m2-production-api.md
