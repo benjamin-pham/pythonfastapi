@@ -15,7 +15,7 @@ Tạo bộ tài liệu tự học giúp một developer **C#/ASP.NET** (biết c
 - Liên hệ kiến thức C#/ASP.NET ở những chỗ có tương đương.
 
 **Ngoài phạm vi (YAGNI)**
-- Không có source code lời giải chạy được, không có thư mục code dự án.
+- Không có source code lời giải chạy được, không có thư mục code dự án. (Ngoại lệ: script QA nội bộ trong `tools/` để kiểm tra tài liệu — không phải nội dung học.)
 - Không build website (MkDocs...), không dùng wikilink Obsidian.
 - Không có GraphQL, không có file câu hỏi phỏng vấn riêng.
 
@@ -128,13 +128,15 @@ Tổng: 46 bài học + 6 README (gốc, 00–04) + 5 file project + 4 appendix 
 [⬅️ Bài trước](./NN-1-...md) | [📚 Mục lục <Level>](./README.md) | [Bài tiếp ➡️](./NN+1-...md)
 ```
 
+Breadcrumb và thanh điều hướng **được sinh tự động** từ một manifest duy nhất (`tools/manifest.py`) bởi `python3 -m tools.scaffold`, nằm giữa các marker `<!-- nav:top -->…<!-- /nav:top -->` và `<!-- nav:bottom -->…<!-- /nav:bottom -->`; không sửa tay. Nhãn link ⬅️/➡️ hiển thị **tiêu đề trang đích** (vd. `⬅️ Collections: list, tuple, dict, set`) thay vì chữ "Bài trước/Bài tiếp".
+
 Quy tắc thanh điều hướng ở bài đầu/cuối level:
 - Bài đầu level: "⬅️" trỏ về `README.md` của level đó.
 - Bài cuối level 01–04: "➡️" trỏ tới milestone dự án của level; milestone trỏ tiếp tới README level kế tiếp (M3 trỏ về README gốc).
 - Bài cuối level 00 (không có milestone): "➡️" trỏ thẳng tới `01-fresher/README.md`.
 
 ### 4.2 README của level
-Breadcrumb · Mục tiêu đầu ra · Thời lượng ước tính · Bảng mục lục (STT, bài, thời lượng) · Link milestone dự án · Link `self-assessment.md` · Thanh điều hướng (level trước | Home | level sau).
+Breadcrumb · Mục tiêu đầu ra · Thời lượng ước tính · Bảng mục lục (STT, bài, thời lượng) · Link milestone dự án · Link `self-assessment.md` · Thanh điều hướng theo luồng tuyến tính (trang trước trong luồng đọc | 🏠 Home | bài đầu tiên của level).
 
 ### 4.3 Milestone dự án
 Breadcrumb · Bối cảnh · Yêu cầu chức năng · Yêu cầu kỹ thuật · Gợi ý cấu trúc thư mục · Gợi ý triển khai (`<details>`) · Definition of Done (checklist) · Thử thách thêm · Điều hướng.
@@ -164,6 +166,6 @@ README → 00 (README → 01 → 02)
 
 ## 7. Kiểm tra chất lượng
 
-- Script kiểm tra link: quét mọi `](...md)` tương đối, xác nhận file đích tồn tại (chạy bằng Python, không commit script vào repo trừ khi cần).
+- Bộ công cụ QA (Python stdlib, commit trong `tools/` + `tests/`): `tools/manifest.py` (danh sách trang + thứ tự đọc), `tools/scaffold.py` (tạo stub + sinh nav), `tools/check_docs.py` (link chết, nav đúng, section bắt buộc, link mục lục bắt buộc, cú pháp code Python, file mồ côi, `--strict` báo stub còn sót).
 - Rà soát mỗi bài có đủ các section bắt buộc của template.
 - Code ví dụ phải đúng cú pháp Python 3.13+ / API FastAPI–Pydantic v2–SQLAlchemy 2.0 hiện hành.
