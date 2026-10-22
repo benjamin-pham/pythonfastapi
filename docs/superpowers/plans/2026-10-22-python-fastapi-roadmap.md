@@ -1167,47 +1167,10 @@ git commit -m "docs(middle): author lessons 07-12 and project milestone M2"
 - Consumes: Bài 01–06 của Level 04.
 - Produces: Hoàn tất toàn bộ Level 04 Senior và Milestone cuối cùng M3 của dự án TaskFlow.
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
-
-Run:
-```bash
-python3 -m tools.check_docs --no-stub 04-senior/07-advanced-api-design.md 04-senior/08-security-owasp.md 04-senior/09-observability.md 04-senior/10-production-deployment.md 04-senior/11-system-design-scaling.md 04-senior/12-senior-soft-skills.md project/m3-scalable-api.md
-```
-Expected: FAIL với 7 lỗi `still a stub`.
-
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
-
-Yêu cầu nội dung cụ thể:
-1. `04-senior/07-advanced-api-design.md`:
-   - Chiến lược API Versioning (`/api/v1`, `/api/v2` vs header), triển khai **Idempotency-Key** bằng Redis để chống tạo trùng giao dịch khi mạng chập chờn, thuật toán **Rate Limiting** (Token Bucket / Sliding Window bằng Redis script), Optimistic Concurrency Control với `ETag` / `If-Match`, và gửi/nhận Webhook có chữ ký HMAC-SHA256 (`hmac.compare_digest`).
-2. `04-senior/08-security-owasp.md`:
-   - Phân tích **OWASP API Security Top 10** gắn trực tiếp với code FastAPI: chống BOLA/IDOR (kiểm tra quyền sở hữu ở tầng query), chống BOPLA/Mass Assignment (tách biệt schema input/output + `extra="forbid"`), chống SSRF khi server gọi URL ngoài, chống SQL Injection khi viết raw query, bảo mật JWT & secret rotation, quét lỗ hổng tự động bằng `bandit` và `pip-audit`.
-3. `04-senior/09-observability.md`:
-   - Ba trụ cột Observability (Logs, Metrics, Traces) với **OpenTelemetry** cho FastAPI, SQLAlchemy, Redis và `httpx`; xuất metrics Prometheus (RED metrics: Rate, Errors, Duration histogram); gắn `trace_id` và `span_id` vào log JSON của `structlog` để nhảy từ cảnh báo Grafana thẳng tới trace chậm và dòng log lỗi.
-4. `04-senior/10-production-deployment.md`:
-   - Mô hình tiến trình production (`uvicorn` multi-worker hoặc `gunicorn -k uvicorn.workers.UvicornWorker`, cách tính số worker theo CPU core trong container), xử lý **Graceful Shutdown** (`SIGTERM`, `--timeout-graceful-shutdown`), tách biệt Liveness probe (`/health/live`) và Readiness probe (`/health/ready` kiểm tra DB/Redis), chiến lược chạy Alembic migration an toàn khi rolling update (Expand–Contract pattern), cấu hình Kubernetes Deployment/Service/HPA cơ bản.
-5. `04-senior/11-system-design-scaling.md`:
-   - Mở rộng tầng dữ liệu: đánh index PostgreSQL nâng cao (composite index, partial index, GIN index cho JSONB/full-text search, đọc `EXPLAIN (ANALYZE, BUFFERS)`), dùng **PgBouncer** gom kết nối, tách Read Replica trong SQLAlchemy (`RoutingSession`), mẫu **Transactional Outbox** đảm bảo nhất quán giữa DB và message broker, và Circuit Breaker / Retry có jitter khi gọi dịch vụ ngoài.
-6. `04-senior/12-senior-soft-skills.md`:
-   - Tư duy của một Senior Engineer: viết **ADR (Architecture Decision Record)** ngắn gọn có trade-offs, nghệ thuật Code Review trong hệ sinh thái Python, quản lý và trả nợ kỹ thuật (Tech Debt) có kế hoạch, dẫn dắt xử lý sự cố (Incident Response & Blameless Postmortem), và kèm cặp (mentoring) đồng đội chuyển sang Python/FastAPI.
-7. `project/m3-scalable-api.md` (theo đúng template Milestone dự án):
-   - Đưa **TaskFlow API lên M3 (Scalable & Observable)**: thêm thực thể `Comment` và hệ thống thông báo, tích hợp Redis cache + Rate Limiting + Idempotency-Key, đẩy việc gửi thông báo/nhắc việc quá hạn sang worker nền **ARQ**, cập nhật bảng công việc theo thời gian thực qua **WebSocket** + Redis Pub/Sub, tích hợp **OpenTelemetry** + `/health/live` & `/health/ready`, và kiểm tra tải bằng `locust`.
-
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
-
-Run:
-```bash
-python3 -m tools.scaffold
-python3 -m tools.check_docs --no-stub 04-senior/07-advanced-api-design.md 04-senior/08-security-owasp.md 04-senior/09-observability.md 04-senior/10-production-deployment.md 04-senior/11-system-design-scaling.md 04-senior/12-senior-soft-skills.md project/m3-scalable-api.md
-```
-Expected: `check_docs: 0 error(s) in 61 pages`
-
-- [ ] **Step 4: Commit Task 10**
-
-```bash
-git add 04-senior/ project/m3-scalable-api.md
-git commit -m "docs(senior): author lessons 07-12 and project milestone M3"
-```
+- [x] **Step 1: Chạy `--no-stub` xác nhận 7 file đang là stub**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 7 file (xóa `<!-- STUB -->`)**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
+- [x] **Step 4: Commit Task 10**
 
 ---
 
