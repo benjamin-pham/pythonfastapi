@@ -969,7 +969,7 @@ git commit -m "docs(junior): author level 02 README and lessons 01-04"
 - Consumes: Bài 01–04 của Level 02.
 - Produces: Hoàn tất Level 02 Junior và Milestone M1 của dự án TaskFlow.
 
-- [ ] **Step 1: Chạy `--no-stub` xác nhận 6 file đang là stub**
+- [x] **Step 1: Chạy `--no-stub` xác nhận 6 file đang là stub**
 
 Run:
 ```bash
@@ -977,7 +977,7 @@ python3 -m tools.check_docs --no-stub 02-junior/05-fastapi-first-app.md 02-junio
 ```
 Expected: FAIL với 6 lỗi `still a stub`.
 
-- [ ] **Step 2: Biên soạn nội dung đầy đủ cho 6 file (xóa `<!-- STUB -->`)**
+- [x] **Step 2: Biên soạn nội dung đầy đủ cho 6 file (xóa `<!-- STUB -->`)**
 
 Yêu cầu nội dung cụ thể:
 1. `02-junior/05-fastapi-first-app.md`:
@@ -993,7 +993,7 @@ Yêu cầu nội dung cụ thể:
 6. `project/m1-crud-api.md` (theo đúng template Milestone dự án):
    - Nâng cấp TaskFlow từ CLI lên **REST API (M1)** với FastAPI + Pydantic v2, quản lý 2 resource `Project` và `Task` lưu trong in-memory repository (inject qua `Depends`), xử lý lỗi chuẩn, cấu hình qua `pydantic-settings`, và bộ test đầy đủ bằng `pytest` + `fastapi.testclient.TestClient`.
 
-- [ ] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
+- [x] **Step 3: Đồng bộ nav và chạy kiểm tra tài liệu**
 
 Run:
 ```bash
@@ -1002,7 +1002,7 @@ python3 -m tools.check_docs --no-stub 02-junior/05-fastapi-first-app.md 02-junio
 ```
 Expected: `check_docs: 0 error(s) in 61 pages`
 
-- [ ] **Step 4: Commit Task 6**
+- [x] **Step 4: Commit Task 6**
 
 ```bash
 git add 02-junior/ project/m1-crud-api.md
